@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Experimental.GlobalIllumination;
 using BepInEx.Logging;
+using static UnityEngine.ParticleSystem.PlaybackState;
 
 
 namespace AbandonedCompanyAssets.Behaviours
@@ -17,6 +18,19 @@ namespace AbandonedCompanyAssets.Behaviours
         private Light lighting;
         private AudioSource audioSource;
         public AudioClip flame = assetCall.bundle.LoadAsset<AudioClip>("Assets/Ripped Assets/AudioClip/CandleFlame.ogg");
+        //stuff for light flicker
+        public float minIntensity = 0f;
+        public float maxIntensity = 400f;
+        public int smoothing = 35;
+
+        Queue<float> smoothQueue;
+        float lastSum = 0;
+
+        public void Reset()
+        {
+            smoothQueue.Clear();
+            lastSum = 0;
+        }
 
         public override void Start()
         {
@@ -25,12 +39,10 @@ namespace AbandonedCompanyAssets.Behaviours
             particles = GetComponentInChildren<ParticleSystem>();
             lighting = GetComponentInChildren<Light>();
             audioSource = GetComponentInChildren<AudioSource>();
+
             
 
-
-
-
-            var myLogger = new ManualLogSource("ACALogger");
+        var myLogger = new ManualLogSource("ACALogger");
             BepInEx.Logging.Logger.Sources.Add(myLogger);
             if (particles == null )
             {
@@ -41,6 +53,7 @@ namespace AbandonedCompanyAssets.Behaviours
                 myLogger.LogDebug("WHERE THE FUCK ARE MY LIGHTINGS");
             }
         }
+
         public override void EquipItem()
         {
             base.EquipItem();
@@ -67,12 +80,12 @@ namespace AbandonedCompanyAssets.Behaviours
         }
         private void candleStart(bool startCandle)
         {
-            if (startCandle) 
+            if (startCandle)
             {
                 audioSource.clip = flame;
+                audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
                 audioSource.loop = true;
                 audioSource.Play();
-                
             }
             else
             {
@@ -80,5 +93,4 @@ namespace AbandonedCompanyAssets.Behaviours
             }
         }
     }
-
 }

@@ -48,7 +48,7 @@ namespace AbandonedCompanyAssets
             Common = 40,
             Extremely_Common = 50,
             Too_Common = 75,
-            Cheating = 100
+            Cheating = 1000
         }
 
         public void Awake()    
@@ -58,6 +58,7 @@ namespace AbandonedCompanyAssets
             Item candle = assetCall.bundle.LoadAsset<Item>("Assets/candleItem.asset");
 
             createItemLight script = candle.spawnPrefab.AddComponent<createItemLight>();
+            flickeringLight script2 = candle.spawnPrefab.AddComponent<flickeringLight>();
 
             //Stuff for physics prop
             script.grabbable = true;
