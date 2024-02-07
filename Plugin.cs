@@ -54,7 +54,6 @@ namespace AbandonedCompanyAssets
         public void Awake()    
         {
             instance = this;
-            //MyAssets = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Info.Location), "abandonedcompanypropertyitems"));
 
             Item candle = assetCall.bundle.LoadAsset<Item>("Assets/candleItem.asset");
 
