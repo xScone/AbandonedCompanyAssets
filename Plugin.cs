@@ -16,6 +16,7 @@ using static LethalLib.Modules.Levels;
 using AbandonedCompanyAssets.Behaviours;
 using UnityEngine.Experimental.GlobalIllumination;
 using JetBrains.Annotations;
+using GameNetcodeStuff;
 
 
 namespace AbandonedCompanyAssets
@@ -64,10 +65,10 @@ namespace AbandonedCompanyAssets
             script.grabbable = true;
             script.grabbableToEnemies = true;
             script.itemProperties = candle;
-
+            
             NetworkPrefabs.RegisterNetworkPrefab(candle.spawnPrefab);
             Utilities.FixMixerGroups(candle.spawnPrefab);
-            Items.RegisterScrap(candle,(int) spawnRate.Cheating, (LevelTypes) (-1));
+            Items.RegisterScrap(candle,(int) spawnRate.Uncommon, (LevelTypes) (-1));
 
             TerminalNode node = ScriptableObject.CreateInstance<TerminalNode>();
             node.clearPreviousText = true;
