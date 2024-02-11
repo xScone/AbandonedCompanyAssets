@@ -4,18 +4,20 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
-using UnityEngine.Experimental.GlobalIllumination;
+using HarmonyLib;
+using Unity.Netcode;
 using BepInEx.Logging;
 using LethalLib;
 using static UnityEngine.ParticleSystem.PlaybackState;
 using GameNetcodeStuff;
 using System.Runtime.CompilerServices;
-using Unity.Netcode;
+using AbandonedCompanyAssets.Patches;
+using UnityEngine.ProBuilder;
 
 
 namespace AbandonedCompanyAssets.Behaviours
 {
-    internal class createItemLight : PhysicsProp
+    internal class createItemLight : GrabbableObject
     {
 
         private ParticleSystem particles;
@@ -26,57 +28,72 @@ namespace AbandonedCompanyAssets.Behaviours
         public AudioClip lightFlame = assetCall.bundle.LoadAsset<AudioClip>("Assets/Ripped Assets/AudioClip/LightCandle.ogg");
         public AudioClip blowFlame = assetCall.bundle.LoadAsset<AudioClip>("Assets/Ripped Assets/AudioClip/LightCandleBlow.ogg");
 
-        //stuff for light flicker
-        public float minIntensity = 0f;
-        public float maxIntensity = 400f;
-        public int smoothing = 35;
-        Queue<float> smoothQueue;
-        float lastSum = 0;
-        bool currentlyLit;
-
         public PlayerControllerB currentPlayer;
+        private int failNumber = UnityEngine.Random.Range(minFail, maxFail);
 
         public int failCount;
+        public int totalFailCount;
+        public static int minFail;
+        public static int maxFail;
+        public bool currentlyLit;
+        public static int candleAmount;
+
+        private bool deadCandle;
+
+
+        Queue<float> smoothQueue;
+        float lastSum = 1;
 
         public void Reset()
         {
             smoothQueue.Clear();
             lastSum = 0;
+
         }
 
         public override void Start()
         {
             base.Start();
-
+            //savePatch.dataSave.failList.ForEach()
+            candleAmount = candleAmount + 1;
+            failNumber = UnityEngine.Random.Range(minFail, maxFail);
 
             particles = GetComponentInChildren<ParticleSystem>();
             lighting = GetComponentInChildren<Light>();
             audioSource = GetComponentInChildren<AudioSource>();
 
+            if (!currentlyLit)
+            {
+                lightCandle(false, true);
+                candleStart(false);
+            }
+            else
+            {
+                lightCandle(false, true);
+                candleStart(true);
+            }
 
 
-            var myLogger = new ManualLogSource("ACALogger");
-            BepInEx.Logging.Logger.Sources.Add(myLogger);
             if (particles == null)
             {
-                myLogger.LogDebug("WHERE THE FUCK ARE MY PARTICLES");
+                Plugin.ACALog.LogDebug("WHERE THE FUCK ARE MY PARTICLES");
             }
             if (lighting == null)
             {
-                myLogger.LogDebug("WHERE THE FUCK ARE MY LIGHTINGS");
+                Plugin.ACALog.LogDebug("WHERE THE FUCK ARE MY PARTICLES");
             }
         }
         public override void EquipItem()
         {
             base.EquipItem();
-            lightCandle(false);
+            //lightCandle(false, false);
 
         }
 
         public override void GrabItem()
         {
             base.GrabItem();
-            lightCandle(true);
+            //lightCandle(true, false);
         }
 
         public override void DiscardItem()
@@ -113,6 +130,20 @@ namespace AbandonedCompanyAssets.Behaviours
                 return;
             }
         }
+        public override void ItemActivate(bool used, bool buttonDown = true)
+        {
+            base.ItemActivate(used, buttonDown);
+            Plugin.ACALog.LogDebug("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+            if (currentlyLit)
+            {
+                lightCandle(false, false);
+            }
+            else
+            {
+                lightCandle(false, false);
+            }
+        }
+
         private void candleStart(bool startCandle)
         {
             if (startCandle)
@@ -128,19 +159,17 @@ namespace AbandonedCompanyAssets.Behaviours
             }
         }
 
-        public void lightCandle(bool grabbing)
+        public void lightCandle(bool grabbing, bool freshCandle)
         {
             currentPlayer = GameNetworkManager.Instance.localPlayerController;
             int sanityReduction = (int)currentPlayer.insanityLevel / 2;
-
-
             int failChance = UnityEngine.Random.Range(1, 100);
-            int successChance = UnityEngine.Random.Range(1, (100 - sanityReduction));
-            if (grabbing != true && !currentlyLit)
-            
-            if (currentPlayer.insanityLevel >= 15 && (float)failChance >= ((float)successChance * 3.5) && (!grabbing & !currentlyLit) && failCount < 2)
+            int successChance = UnityEngine.Random.Range(1, (115 - sanityReduction));
+
+            if (currentPlayer.insanityLevel >= 15 && (float)failChance >= ((float)successChance * 3.5) && !grabbing && !currentlyLit && failCount < 2 && totalFailCount < failNumber && !freshCandle)
             {
                 failCount = failCount + 1;
+                totalFailCount = totalFailCount + 1;
                 particles.Stop();
                 particles.Clear();
                 currentlyLit = false;
@@ -149,7 +178,7 @@ namespace AbandonedCompanyAssets.Behaviours
                 audioSource.pitch = UnityEngine.Random.Range(0.4f, 0.6f);
                 audioSource.PlayOneShot(blowFlame);
             }
-            else if (!currentlyLit)
+            else if (!currentlyLit && totalFailCount < failNumber && !freshCandle)
             {
                 particles.Play();
                 lighting.enabled = true;
@@ -159,8 +188,24 @@ namespace AbandonedCompanyAssets.Behaviours
                 currentlyLit = true;
                 failCount = 0;
             }
+            else if (totalFailCount < failNumber)
+            {
+                particles.Stop();
+                lighting.enabled = false;
+                candleStart(false);
+                audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+                audioSource.PlayOneShot(blowFlame);
+                currentlyLit = false;
+            }
+            else
+            {
+                particles.Stop();
+                lighting.enabled = false;
+                candleStart(false);
+                deadCandle = true;
+            }
+
         }
 
-        
     }
 }

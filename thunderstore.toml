@@ -1,0 +1,31 @@
+[config]
+schemaVersion = "0.1.0"
+
+[package]
+namespace = "Sconeys"
+name = "Abandoned Company Assets"
+versionNumber = "0.1.0"
+description = "Many Company Assets go missing over time; now you'll have a chance to find and recover them."
+websiteUrl = "https://github.com/xScone/AbandonedCompanyAssets"
+containsNsfwContent = false
+[package.dependencies]
+AuthorName-PackageName = "0.0.1"
+
+
+[build]
+icon = "./icon.png"
+readme = "./README.md"
+outdir = "./build"
+
+[[build.copy]]
+source = "./dist"
+target = ""
+
+
+[publish]
+repository = "https://thunderstore.io"
+communities = [ "riskofrain2", ]
+[publish.categories]
+riskofrain2 = [ "items", "skills", ]
+
+

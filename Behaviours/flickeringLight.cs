@@ -15,9 +15,9 @@ namespace AbandonedCompanyAssets.Behaviours
     internal class flickeringLight : MonoBehaviour
     {
         private Light lightSource;
-        public float minIntensity = 100f;
-        public float maxIntensity = 200f;
-        public int smoothing = 35;
+        public static float minIntensity = 100f;
+        public static float maxIntensity = 200f;
+        public static int smoothing = 35;
 
 
         Queue<float> smoothQueue;
