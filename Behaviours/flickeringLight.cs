@@ -12,7 +12,7 @@ using static UnityEngine.ParticleSystem.PlaybackState;
 
 namespace AbandonedCompanyAssets.Behaviours
 {
-    internal class flickeringLight : MonoBehaviour
+    internal class FlickeringLight : MonoBehaviour
     {
         private Light lightSource;
         public static float minIntensity = 100f;
