@@ -19,6 +19,16 @@ using AbandonedCompanyAssets.Patches;
 using UnityEngine.Yoga;
 using Steamworks.Ugc;
 using UnityEngine.UIElements;
+using Unity.Netcode;
+using NetworkPrefabs = LethalLib.Modules.NetworkPrefabs;
+
+//Pile POS: 0, 0.06, -0.025
+//Pile ROT: -15, 195, -10
+//Duo POS: 0, 0.1, -0.025
+//Duo ROT: -60, 195, -5
+//Single POS: -0.025, 0.1, 0
+//Single ROT: 0, 0, -90
+
 
 
 namespace AbandonedCompanyAssets
@@ -29,7 +39,7 @@ namespace AbandonedCompanyAssets
         public static int maxEquipmentSpawns = 8;
         public static int minEquipmentSpawns = 2;
     }
-    public static class assetCall 
+    public static class assetCall
     {
         static string assetFile = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "abandonedcompanypropertyitems");
         public static AssetBundle bundle = AssetBundle.LoadFromFile(assetFile);
@@ -42,7 +52,7 @@ namespace AbandonedCompanyAssets
     {
         internal static ManualLogSource ACALog;
         public static Item candle = assetCall.bundle.LoadAsset<Item>("Assets/Working Shit/candleItem.asset");
-        public static Item glowstick = assetCall.bundle.LoadAsset<Item>("Assets/Working Shit/glowstick.asset");
+        public static Item glowstick = assetCall.bundle.LoadAsset<Item>("Assets/Working Shit/glowstickItem.asset");
         public static GameObject droppableGlowstick = assetCall.bundle.LoadAsset<GameObject>("Assets/Working Shit/droppableGlowstick.prefab");
         public static Plugin instance;
         //public static AssetBundle MyAssets;
@@ -84,6 +94,8 @@ namespace AbandonedCompanyAssets
             CandleStuff candleStuff = candle.spawnPrefab.AddComponent<CandleStuff>();
             FlickeringLight script2 = candle.spawnPrefab.AddComponent<FlickeringLight>();
             GlowstickStuff glowstickStuff = glowstick.spawnPrefab.AddComponent<GlowstickStuff>();
+            
+
             GlowstickStuff droppableGlowstickStuff = droppableGlowstick.AddComponent<GlowstickStuff>();
 
 
@@ -100,40 +112,41 @@ namespace AbandonedCompanyAssets
             glowstickStuff.grabbableToEnemies = true;
             glowstickStuff.useCooldown = 0.8f;
 
-            GlowstickStuff.clonePrefab = droppableGlowstick;
+            GlowstickStuff.spawnedGlowstick = droppableGlowstick;
             droppableGlowstickStuff.name = "Glowstick";
 
 
             droppableGlowstickStuff.grabbable = false;
             droppableGlowstickStuff.grabbableToEnemies = true;
-            droppableGlowstickStuff.scrapValue = 0;
             droppableGlowstickStuff.itemProperties = glowstick;
             droppableGlowstickStuff.fallTime = 5f;
 
 
             //Item Stuff
-            NetworkPrefabs.RegisterNetworkPrefab(candle.spawnPrefab);
-            Utilities.FixMixerGroups(candle.spawnPrefab);
+            NetworkPrefabs.RegisterNetworkPrefab(candle.spawnPrefab);   
             NetworkPrefabs.RegisterNetworkPrefab(glowstick.spawnPrefab);
-            NetworkPrefabs.RegisterNetworkPrefab(GlowstickStuff.clonePrefab);
+            NetworkPrefabs.RegisterNetworkPrefab(GlowstickStuff.spawnedGlowstick);
+            Utilities.FixMixerGroups(candle.spawnPrefab);
+            Utilities.FixMixerGroups(GlowstickStuff.spawnedGlowstick);
             Utilities.FixMixerGroups(glowstick.spawnPrefab);
             Items.RegisterScrap(candle,(int) spawnRate.Rare, (LevelTypes) (-1));
-            Items.RegisterScrap(glowstick, (int)spawnRate.NonSpawning, (LevelTypes)(-1));
             candle.toolTips = new string[] { "Use item : [LMB]" };
             CandleStuff.minFail = 2;
-            CandleStuff.maxFail = 5;
+            CandleStuff.maxFail = 4;
 
             TerminalNode node = ScriptableObject.CreateInstance<TerminalNode>();
             node.clearPreviousText = true;
             node.displayText = "The Candle. A cheap but extremely unreliable method of lighting your way. The Company is not responsible for any fires.\n\n";
             TerminalNode node2 = ScriptableObject.CreateInstance<TerminalNode>();
             node.clearPreviousText = true;
-            node.displayText = "glowstick lol";
+            node.displayText = "A stack of glowing sticks! The glowsticks do not produce much light, however come in VERY handy for keeping track of your path! Some creatures may be interested in them, however.";
+
+            
 
 
 
             Items.RegisterShopItem(candle, null, null, node, 7);
-            Items.RegisterShopItem(glowstick, 1);
+            Items.RegisterShopItem(glowstick, null, null, node2, 15);
 
             // Plugin startup logic
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");

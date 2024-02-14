@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 3473944095
+CRC: 2066005718
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: c4cd0e326d956dc286cc4a779583ea90
+    Hash: dbea00f59a008cfa705738b6323c0166
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 8b2969be300cb920500d04893ab24f9d
+    Hash: 5eb98f1f11432c114c1314e80053a341
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: c4cd0e326d956dc286cc4a779583ea90
+    Hash: dbea00f59a008cfa705738b6323c0166
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -43,8 +43,6 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 11500000, guid: 3c36d0a92cbb1f26a39169ef0eae393a, type: 3}
 - Class: 114
-  Script: {fileID: 11500000, guid: 3d0cf24d2ccc3b7eab72048d0f57c437, type: 3}
-- Class: 114
   Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
 - Class: 115
   Script: {instanceID: 0}
@@ -61,20 +59,19 @@ ClassTypes:
 - Class: 245
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
-- AssemblyName: Assembly-CSharp
-  ClassName: Battery
 - AssemblyName: Unity.RenderPipelines.HighDefinition.Runtime
   ClassName: UnityEngine.Rendering.HighDefinition.BoolScalableSettingValue
 - AssemblyName: Unity.RenderPipelines.HighDefinition.Runtime
   ClassName: UnityEngine.Rendering.HighDefinition.IntScalableSettingValue
 Assets:
 - Assets/Working Shit/candleItem.asset
-- Assets/Working Shit/glowstick.asset
+- Assets/Working Shit/glowstickSnap 1.wav
+- Assets/Working Shit/glowstickItem.asset
 - Assets/Ripped Assets/AudioClip/LightCandle.ogg
 - Assets/Ripped Assets/AudioClip/LightCandleBlow.ogg
 - Assets/Ripped Assets/AudioClip/CandleFlame.ogg
 - Assets/Working Shit/Glowstick Pile 3.prefab
 - Assets/Working Shit/droppableGlowstick.prefab
-- Assets/Working Shit/Glowstick Pile 2.prefab
+- Assets/Working Shit/glowstickIcon.png
 - Assets/Working Shit/Glowstick.prefab
 Dependencies: []

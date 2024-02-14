@@ -150,7 +150,7 @@ namespace AbandonedCompanyAssets.itemStuff
             currentPlayer = GameNetworkManager.Instance.localPlayerController;
             int sanityReduction = (int)currentPlayer.insanityLevel / 2;
             int failChance = UnityEngine.Random.Range(1, 100);
-            int successChance = UnityEngine.Random.Range(1, 115 - sanityReduction);
+            int successChance = UnityEngine.Random.Range(1, 100 - sanityReduction);
 
             if (currentPlayer.insanityLevel >= 15 && failChance >= successChance * 3.5 && !grabbing && !currentlyLit && failCount < 2 && totalFailCount < failNumber && !freshCandle)
             {
