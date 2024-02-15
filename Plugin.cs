@@ -51,11 +51,10 @@ namespace AbandonedCompanyAssets
     public class Plugin : BaseUnityPlugin
     {
         internal static ManualLogSource ACALog;
-        public static Item candle = assetCall.bundle.LoadAsset<Item>("Assets/Working Shit/candleItem.asset");
-        public static Item glowstick = assetCall.bundle.LoadAsset<Item>("Assets/Working Shit/glowstickItem.asset");
-        public static GameObject droppableGlowstick = assetCall.bundle.LoadAsset<GameObject>("Assets/Working Shit/droppableGlowstick.prefab");
+        public static Item candle = assetCall.bundle.LoadAsset<Item>("Assets/Items/candle/candleItem.asset");
+        public static Item glowstick = assetCall.bundle.LoadAsset<Item>("Assets/Items/glowstick/glowstickItem.asset");
+        public static Item GlowstickDroppedItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/glowstick/glowstickItem(Dropped).asset");
         public static Plugin instance;
-        //public static AssetBundle MyAssets;
 
 
         
@@ -91,47 +90,25 @@ namespace AbandonedCompanyAssets
                 }
             }
 
-            CandleStuff candleStuff = candle.spawnPrefab.AddComponent<CandleStuff>();
-            FlickeringLight script2 = candle.spawnPrefab.AddComponent<FlickeringLight>();
-            GlowstickStuff glowstickStuff = glowstick.spawnPrefab.AddComponent<GlowstickStuff>();
-            
-
-            GlowstickStuff droppableGlowstickStuff = droppableGlowstick.AddComponent<GlowstickStuff>();
-
-
-
 
             //Stuff for physics prop
-            candleStuff.grabbable = true;
-            candleStuff.grabbableToEnemies = true;
-            candleStuff.useCooldown = 0.8f;
-            candleStuff.itemProperties = candle;
-
-            glowstickStuff.itemProperties = glowstick;
-            glowstickStuff.grabbable = true;
-            glowstickStuff.grabbableToEnemies = true;
-            glowstickStuff.useCooldown = 0.8f;
-
-            GlowstickStuff.spawnedGlowstick = droppableGlowstick;
-            droppableGlowstickStuff.name = "Glowstick";
 
 
-            droppableGlowstickStuff.grabbable = false;
-            droppableGlowstickStuff.grabbableToEnemies = true;
-            droppableGlowstickStuff.itemProperties = glowstick;
-            droppableGlowstickStuff.fallTime = 5f;
+            
+
 
 
             //Item Stuff
-            NetworkPrefabs.RegisterNetworkPrefab(candle.spawnPrefab);   
+            NetworkPrefabs.RegisterNetworkPrefab(candle.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(glowstick.spawnPrefab);
-            NetworkPrefabs.RegisterNetworkPrefab(GlowstickStuff.spawnedGlowstick);
+            NetworkPrefabs.RegisterNetworkPrefab(GlowstickDroppedItem.spawnPrefab);
             Utilities.FixMixerGroups(candle.spawnPrefab);
-            Utilities.FixMixerGroups(GlowstickStuff.spawnedGlowstick);
+            Utilities.FixMixerGroups(GlowstickDroppedItem.spawnPrefab);
             Utilities.FixMixerGroups(glowstick.spawnPrefab);
-            Items.RegisterScrap(candle,(int) spawnRate.Rare, (LevelTypes) (-1));
+            Items.RegisterScrap(candle, (int)spawnRate.Rare, (LevelTypes)(-1));
             candle.toolTips = new string[] { "Use item : [LMB]" };
-            CandleStuff.minFail = 2;
+            glowstick.toolTips = new string[] { "Drop Glowstick : [LMB]" };
+            CandleStuff.minFail = 1;
             CandleStuff.maxFail = 4;
 
             TerminalNode node = ScriptableObject.CreateInstance<TerminalNode>();
