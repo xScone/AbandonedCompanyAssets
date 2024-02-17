@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using GameNetcodeStuff;
+using Unity.Netcode;
 
 
 namespace AbandonedCompanyAssets.itemStuff
@@ -19,16 +20,13 @@ namespace AbandonedCompanyAssets.itemStuff
         public PlayerControllerB currentPlayer;
         private int failNumber = UnityEngine.Random.Range(minFail, maxFail);
 
-        public int failCount;
-        public int totalFailCount;
+        private int failCount;
+        private int totalFailCount;
         public static int minFail;
         public static int maxFail;
-        public bool currentlyLit;
+        private bool currentlyLit;
         public float defaultLightIntensity;
         public float defaultLightRange;
-
-
-        private bool candleDead;
 
 
         public override void Start()
@@ -39,8 +37,10 @@ namespace AbandonedCompanyAssets.itemStuff
             particles = GetComponentInChildren<ParticleSystem>();
             lighting = GetComponentInChildren<Light>();
             audioSource = GetComponentInChildren<AudioSource>();
+            particles.Stop();
+            particles.Clear();
 
-            if (!currentlyLit)
+            /*/if (!currentlyLit)
             {
                 lightCandle(false, true);
                 candleStart(false);
@@ -49,7 +49,7 @@ namespace AbandonedCompanyAssets.itemStuff
             {
                 lightCandle(false, true);
                 candleStart(true);
-            }
+            }/*/
 
 
             if (particles == null)
@@ -79,6 +79,7 @@ namespace AbandonedCompanyAssets.itemStuff
             short val2 = (short) (saveData & 0xFFFF);
             this.failNumber = val1;
             this.totalFailCount = val2;
+            saveData = 0;
 
         }
 
@@ -87,18 +88,16 @@ namespace AbandonedCompanyAssets.itemStuff
             base.Update();
             if (currentlyLit)
             {
-                if (lighting.intensity < defaultLightIntensity && lighting.range < defaultLightRange)
+                if (lighting.range < defaultLightRange)
                 {
-                    lighting.intensity += Time.deltaTime * 5;
-                    lighting.range += Time.deltaTime * 5;
+                    lighting.range += Time.deltaTime * 3;
                 }
             }
             else
             {
-                if (lighting.intensity > 0 && lighting.range > 0)
+                if (lighting.range > 0)
                 {
-                    lighting.intensity -= Time.deltaTime * 5;
-                    lighting.range -= Time.deltaTime * 5;
+                    lighting.range -= Time.deltaTime * 10;
                 }
             }
 
@@ -122,19 +121,14 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void PocketItem()
         {
             base.PocketItem();
-            particles.Stop();
-            particles.Clear();
-            lighting.enabled = false;
-            candleStart(false);
             if (currentlyLit == true)
             {
                 audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
                 audioSource.PlayOneShot(blowFlame);
-                currentlyLit = false;
-            }
-            else
-            {
-                return;
+                particles.Stop();
+                particles.Clear();
+                candleStart(false);
+                lightCandle(false, false);
             }
         }
         public override void ItemActivate(bool used, bool buttonDown = true)
@@ -172,10 +166,10 @@ namespace AbandonedCompanyAssets.itemStuff
                 totalFailCount = totalFailCount + 1;
                 particles.Stop();
                 particles.Clear();
-                currentlyLit = false;
                 candleStart(false);
                 audioSource.pitch = UnityEngine.Random.Range(0.4f, 0.6f);
                 audioSource.PlayOneShot(blowFlame);
+                candleIsLitServerRpc(false, false);
             }
             else if (!currentlyLit && totalFailCount < failNumber && !freshCandle)
             {
@@ -183,8 +177,8 @@ namespace AbandonedCompanyAssets.itemStuff
                 candleStart(true);
                 audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
                 audioSource.PlayOneShot(lightFlame);
-                currentlyLit = true;
                 failCount = 0;
+                candleIsLitServerRpc(true, false);
             }
             else if (totalFailCount < failNumber)
             {
@@ -192,15 +186,36 @@ namespace AbandonedCompanyAssets.itemStuff
                 candleStart(false);
                 audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
                 audioSource.PlayOneShot(blowFlame);
-                currentlyLit = false;
+                candleIsLitServerRpc(false, false);
             }
             else
             {
                 particles.Stop();
                 candleStart(false);
+                candleIsLitServerRpc(false, true);
             }
 
         }
-
+        [ServerRpc]
+        private void candleIsLitServerRpc(bool lit, bool deadCandle)
+        {
+            candleIsLitClientRpc(lit, !deadCandle);
+            if (deadCandle)
+            {
+                candleIsLitClientRpc(false, true);
+            }
+        }
+        [ClientRpc]
+        private void candleIsLitClientRpc(bool lit, bool deadCandle)
+        {
+            if (lit)
+            {
+                this.currentlyLit = true;
+            }
+            else
+            {
+                this.currentlyLit = false;
+            }
+        }
     }
 }

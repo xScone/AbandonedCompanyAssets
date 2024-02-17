@@ -41,12 +41,11 @@ namespace AbandonedCompanyAssets.itemStuff
             base.Update();
             if (droppedStick)
             {
-                this.GetComponentInChildren<GrabbableObject>().insertedBattery.charge -= Time.deltaTime;
+                this.GetComponentInChildren<GrabbableObject>().insertedBattery.charge -= Time.deltaTime % 60;
                 if (this.GetComponentInChildren<GrabbableObject>().insertedBattery.charge < 3)
                 {
-                    lighting.intensity -= Time.deltaTime * 3;
-                    lighting.range -= Time.deltaTime * 3;
-                    if (lighting.range > 0.05 ) 
+                    glowstickDieServerRpc();
+                    if (lighting.range > 0.05)
                     {
                         this.GetComponentInChildren<BoxCollider>().enabled = false;
                     }
@@ -56,25 +55,27 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void PocketItem()
         {
             base.PocketItem();
-            lighting.enabled = false;
+            isGlowstickLitServerRpc(false);
         }
         public override void EquipItem()
         {
             base.EquipItem();
-            lighting.enabled = true;
+            isGlowstickLitServerRpc(true);
         }
 
         public override int GetItemDataToSave()
         {
             base.GetItemDataToSave();
+            Plugin.ACALog.LogInfo("Save Data:" + (currentState));
             return this.currentState;
+
         }
 
         public override void LoadItemSaveData(int saveData)
         {
             base.LoadItemSaveData(saveData);
             this.currentState = saveData;
-            
+            Plugin.ACALog.LogInfo("Load Data:" + (saveData));
             for (int i = 0; i < currentState; i++)
             {
                 this.gameObject.transform.GetChild(i).gameObject.SetActive(false);
@@ -115,6 +116,29 @@ namespace AbandonedCompanyAssets.itemStuff
             }
             GlowstickStackClientRpc();
 
+        }
+        [ServerRpc]
+        private void isGlowstickLitServerRpc(bool lit)
+        {
+            if (lit)
+            {
+                this.lighting.enabled = true;
+            }
+            else
+            {
+                this.lighting.enabled = false;
+            }
+        }
+        [ServerRpc]
+        private void glowstickDieServerRpc()
+        {
+            glowstickDieClientRpc();
+        }
+        [ClientRpc]
+        private void glowstickDieClientRpc()
+        {
+            this.lighting.intensity -= Time.deltaTime * 3;
+            this.lighting.range -= Time.deltaTime * 3;
         }
 
         [ClientRpc] 

@@ -54,6 +54,7 @@ namespace AbandonedCompanyAssets
         public static Item candle = assetCall.bundle.LoadAsset<Item>("Assets/Items/candle/candleItem.asset");
         public static Item glowstick = assetCall.bundle.LoadAsset<Item>("Assets/Items/glowstick/glowstickItem.asset");
         public static Item GlowstickDroppedItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/glowstick/glowstickItem(Dropped).asset");
+        public static Item lighter = assetCall.bundle.LoadAsset<Item>("Assets/Items/lighter/Lighter.asset");
         public static Plugin instance;
 
 
@@ -102,10 +103,17 @@ namespace AbandonedCompanyAssets
             NetworkPrefabs.RegisterNetworkPrefab(candle.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(glowstick.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(GlowstickDroppedItem.spawnPrefab);
+            NetworkPrefabs.RegisterNetworkPrefab(lighter.spawnPrefab);
             Utilities.FixMixerGroups(candle.spawnPrefab);
             Utilities.FixMixerGroups(GlowstickDroppedItem.spawnPrefab);
             Utilities.FixMixerGroups(glowstick.spawnPrefab);
-            Items.RegisterScrap(candle, (int)spawnRate.Rare, (LevelTypes)(-1));
+            Utilities.FixMixerGroups(lighter.spawnPrefab);
+
+            Items.RegisterScrap(GlowstickDroppedItem, (int)spawnRate.Legendary, (LevelTypes)(-1));
+            Items.RegisterScrap(candle, (int)spawnRate.Epic, (LevelTypes)(-1));
+            Items.RegisterScrap(lighter, (int)spawnRate.Rare, (LevelTypes)(-1));
+
+            lighter.toolTips = new string[] { "Light Flip Lighter : [LMB]" };
             candle.toolTips = new string[] { "Use item : [LMB]" };
             glowstick.toolTips = new string[] { "Drop Glowstick : [LMB]" };
             CandleStuff.minFail = 1;
@@ -116,14 +124,14 @@ namespace AbandonedCompanyAssets
             node.displayText = "The Candle. A cheap but extremely unreliable method of lighting your way. The Company is not responsible for any fires.\n\n";
             TerminalNode node2 = ScriptableObject.CreateInstance<TerminalNode>();
             node.clearPreviousText = true;
-            node.displayText = "A stack of glowing sticks! The glowsticks do not produce much light, however come in VERY handy for keeping track of your path! Some creatures may be interested in them, however.";
+            node.displayText = "A stack of glowing sticks! The glowsticks do not produce much light, however come in VERY handy for keeping track of your path, they wont stay lit long so be quick! Some creatures may be interested in them, however.\n\n";
 
             
 
 
 
             Items.RegisterShopItem(candle, null, null, node, 7);
-            Items.RegisterShopItem(glowstick, null, null, node2, 15);
+            Items.RegisterShopItem(glowstick, null, null, node2, 20);
 
             // Plugin startup logic
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
