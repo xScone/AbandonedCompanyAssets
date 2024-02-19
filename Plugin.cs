@@ -55,6 +55,7 @@ namespace AbandonedCompanyAssets
         public static Item glowstick = assetCall.bundle.LoadAsset<Item>("Assets/Items/glowstick/glowstickItem.asset");
         public static Item GlowstickDroppedItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/glowstick/glowstickItem(Dropped).asset");
         public static Item lighter = assetCall.bundle.LoadAsset<Item>("Assets/Items/lighter/Lighter.asset");
+        public static Item bulletLighter = assetCall.bundle.LoadAsset<Item>("Assets/Items/bulletLighter/bulletLighter.asset");
         public static GameObject webBurnParticles = assetCall.bundle.LoadAsset<GameObject>("Assets/Items/lighter/webFire.prefab");
         public static Plugin instance;
 
@@ -107,16 +108,21 @@ namespace AbandonedCompanyAssets
             NetworkPrefabs.RegisterNetworkPrefab(glowstick.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(GlowstickDroppedItem.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(lighter.spawnPrefab);
+            NetworkPrefabs.RegisterNetworkPrefab(bulletLighter.spawnPrefab);
             Utilities.FixMixerGroups(candle.spawnPrefab);
             Utilities.FixMixerGroups(GlowstickDroppedItem.spawnPrefab);
             Utilities.FixMixerGroups(glowstick.spawnPrefab);
             Utilities.FixMixerGroups(lighter.spawnPrefab);
+            Utilities.FixMixerGroups(bulletLighter.spawnPrefab);
 
             Items.RegisterScrap(GlowstickDroppedItem, (int)spawnRate.Legendary, (LevelTypes)(-1));
             Items.RegisterScrap(candle, (int)spawnRate.Epic, (LevelTypes)(-1));
             Items.RegisterScrap(lighter, (int)spawnRate.Rare, (LevelTypes)(-1));
+            Items.RegisterScrap(bulletLighter, (int)spawnRate.Cheating, (LevelTypes)(-1));
+
 
             lighter.toolTips = new string[] { "Light Flip Lighter : [LMB]" };
+            bulletLighter.toolTips = new string[] { "Light Bullet Lighter : [LMB]" };
             candle.toolTips = new string[] { "Use item : [LMB]" };
             glowstick.toolTips = new string[] { "Drop Glowstick : [LMB]" };
             CandleStuff.minFail = 1;

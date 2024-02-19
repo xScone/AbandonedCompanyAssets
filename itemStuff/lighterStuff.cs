@@ -26,6 +26,8 @@ namespace AbandonedCompanyAssets.itemStuff
         private float savedFuel;
         private bool lighterDead;
         private bool pocketingItem;
+        public bool usesFuelToWebBurn;
+        public bool getsExtraFuel;
 
         public override void LoadItemSaveData(int saveData)
         {
@@ -64,7 +66,14 @@ namespace AbandonedCompanyAssets.itemStuff
             }
             else if (!lighterDead)
             {
-                fuel = UnityEngine.Random.Range(300, 1500);
+                if (getsExtraFuel)
+                {
+                    fuel = UnityEngine.Random.Range(500, 2000);
+                }
+                else
+                {
+                    fuel = UnityEngine.Random.Range(300, 1500);
+                }
             }
 
         }
@@ -89,10 +98,11 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void PocketItem()
         {
             base.PocketItem();
-            if (currentState == 0)
+            if (currentState == 1)
             {
                 pocketingItem = true;
                 timerDelay = 0;
+                currentState = 0;
                 lighterServerRpc();
             }
 
@@ -102,6 +112,7 @@ namespace AbandonedCompanyAssets.itemStuff
             base.EquipItem();
             if (pocketingItem)
             {
+                currentState = 1;
                 pocketingItem = false;
                 lighterServerRpc();
             }
@@ -127,7 +138,10 @@ namespace AbandonedCompanyAssets.itemStuff
                             web.mainScript.BreakWebServerRpc(web.trapID, (int)GameNetworkManager.Instance.localPlayerController.playerClientId);
                         }
                         fireSpawnServerRpc(web.centerOfWeb.position);
-                        fuel -= UnityEngine.Random.Range(30, 60);
+                        if (usesFuelToWebBurn)
+                        {
+                            fuel -= UnityEngine.Random.Range(30, 60);
+                        }
                     }
                 }
             }
@@ -229,5 +243,6 @@ namespace AbandonedCompanyAssets.itemStuff
             GameObject newObject = UnityEngine.Object.Instantiate(Plugin.webBurnParticles.gameObject, position, new Quaternion(), StartOfRound.Instance.propsContainer);
 
         }
+        
     }
 }

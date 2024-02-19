@@ -51,6 +51,10 @@ namespace AbandonedCompanyAssets.itemStuff
                     }
                 }
             }
+            if (GameNetworkManager.Instance.gameHasStarted == true && droppedStick)
+            {
+                Destroy(this.gameObject);
+            }
         }
         public override void PocketItem()
         {
@@ -87,6 +91,7 @@ namespace AbandonedCompanyAssets.itemStuff
             Plugin.ACALog.LogInfo(currentState);
             Plugin.ACALog.LogInfo(Plugin.GlowstickDroppedItem.spawnPrefab.gameObject);
             Plugin.ACALog.LogInfo(OwnerClientId);
+            this.currentState += 1;
             /*/if (currentState <= 3)
             {
                 currentState += 1;
@@ -104,23 +109,16 @@ namespace AbandonedCompanyAssets.itemStuff
         [ServerRpc]
         private void GlowstickSpawnServerRpc(Vector3 position, Quaternion rotation)
         {
-            GlowstickSpawnClientRpc(position, rotation);
             GlowstickStackClientRpc();
-
-        }
-        [ClientRpc]
-        private void GlowstickSpawnClientRpc(Vector3 position, Quaternion rotation)
-        {
             GameObject newObject = UnityEngine.Object.Instantiate(Plugin.GlowstickDroppedItem.spawnPrefab.gameObject, position, rotation, StartOfRound.Instance.propsContainer);
             newObject.GetComponent<NetworkObject>().SpawnWithOwnership(OwnerClientId);
-            //newObject.GetComponent<ScanNodeProperties>().scrapValue = 0;
             if (this.currentState < 3)
             {
                 newObject.GetComponentInChildren<AudioSource>().pitch = UnityEngine.Random.Range(0.9f, 1.1f);
                 newObject.GetComponentInChildren<AudioSource>().PlayOneShot(glowstickSnap);
                 newObject.GetComponentInChildren<GrabbableObject>().grabbable = false;
-                currentState += 1;
             }
+
         }
         [ServerRpc]
         private void isGlowstickLitServerRpc(bool lit)

@@ -27,6 +27,8 @@ namespace AbandonedCompanyAssets.itemStuff
         private bool currentlyLit;
         public float defaultLightIntensity;
         public float defaultLightRange;
+        public float randomFailTimeMax;
+        private float randomFailTime;
 
 
         public override void Start()
@@ -86,6 +88,34 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void Update()
         {
             base.Update();
+            if (currentlyLit)
+            {
+                if (randomFailTimeMax == 0 && totalFailCount < failNumber)
+                {
+                    randomFailTimeMax = Random.Range(90f, 500f);
+                }
+                else if (totalFailCount < failNumber)
+                {
+                    randomFailTime += Time.deltaTime;
+                }
+
+                if (randomFailTime > randomFailTimeMax)
+                {
+                    if (Random.Range(0, 100) > 60)
+                    {
+                        particles.Stop();
+                        particles.Clear();
+                        candleStart(false);
+                        lightCandle(false, false);
+                        randomFailTime = 0;
+                    }
+                    else
+                    {
+                        randomFailTime = randomFailTime / 2;
+                    }
+                }
+            }
+
             if (currentlyLit)
             {
                 if (lighting.range < defaultLightRange)
@@ -160,7 +190,7 @@ namespace AbandonedCompanyAssets.itemStuff
             int failChance = UnityEngine.Random.Range(1, 100);
             int successChance = UnityEngine.Random.Range(1, 100 - sanityReduction);
 
-            if (currentPlayer.insanityLevel >= 15 && failChance >= successChance * 3.5 && !grabbing && !currentlyLit && failCount < 2 && totalFailCount < failNumber && !freshCandle)
+            if (currentPlayer.insanityLevel >= 15 && failChance >= successChance * 3.5 && !grabbing && !currentlyLit && totalFailCount < failNumber && !freshCandle)
             {
                 failCount = failCount + 1;
                 totalFailCount = totalFailCount + 1;
