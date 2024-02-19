@@ -96,13 +96,20 @@ namespace AbandonedCompanyAssets.itemStuff
 
 
             Plugin.ACALog.LogInfo("AGAGAGDSAGHFASHPOKAGMDAOFPIGJKMPADF0OGL,");
-            GlowstickSpawnServerRpc(gameObject.transform.position, gameObject.transform.rotation);
+            GlowstickSpawnServerRpc(gameObject.transform.position, GameNetworkManager.Instance.localPlayerController.transform.rotation);
 
         }
 
 
         [ServerRpc]
         private void GlowstickSpawnServerRpc(Vector3 position, Quaternion rotation)
+        {
+            GlowstickSpawnClientRpc(position, rotation);
+            GlowstickStackClientRpc();
+
+        }
+        [ClientRpc]
+        private void GlowstickSpawnClientRpc(Vector3 position, Quaternion rotation)
         {
             GameObject newObject = UnityEngine.Object.Instantiate(Plugin.GlowstickDroppedItem.spawnPrefab.gameObject, position, rotation, StartOfRound.Instance.propsContainer);
             newObject.GetComponent<NetworkObject>().SpawnWithOwnership(OwnerClientId);
@@ -114,11 +121,14 @@ namespace AbandonedCompanyAssets.itemStuff
                 newObject.GetComponentInChildren<GrabbableObject>().grabbable = false;
                 currentState += 1;
             }
-            GlowstickStackClientRpc();
-
         }
         [ServerRpc]
         private void isGlowstickLitServerRpc(bool lit)
+        {
+            isGlowstickLitClientRpc(lit);
+        }
+        [ClientRpc]
+        private void isGlowstickLitClientRpc(bool lit)
         {
             if (lit)
             {

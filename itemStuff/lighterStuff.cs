@@ -4,6 +4,10 @@ using System.Text;
 using UnityEngine;
 using Unity.Netcode;
 using static UnityEngine.Rendering.HighDefinition.ProbeSettings;
+using GameNetcodeStuff;
+using static ES3;
+using UnityEngine.UIElements;
+using AbandonedCompanyAssets.Behaviours;
 
 namespace AbandonedCompanyAssets.itemStuff
 {
@@ -47,10 +51,10 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void Start()
         {
             base.Start();
+            currentState = 0;
             lighting = GetComponentInChildren<Light>();
             flame = GetComponentInChildren<ParticleSystem>();
             audioSource = GetComponentInChildren<AudioSource>();
-            currentState = 0;
             this.GetComponentInChildren<GrabbableObject>().insertedBattery.charge = fuel;
             lighterServerRpc();
 
@@ -64,13 +68,21 @@ namespace AbandonedCompanyAssets.itemStuff
             }
 
         }
-        
+
         public override void ItemActivate(bool used, bool buttonDown = true)
         {
             base.ItemActivate(used, buttonDown);
-            lighterLit = true;
+            if (currentState == 0)
+            {
+                currentState = 1;
+            }
+            else
+            {
+                currentState = 0;
+            }
             timerDelay = 0;
             lighterServerRpc();
+            Plugin.ACALog.LogInfo(currentState);
 
 
         }
@@ -97,7 +109,30 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void Update()
         {
             base.Update();
-            if (currentState == 0 && !pocketingItem)
+            var detectedObjects = Physics.OverlapSphere(GameNetworkManager.Instance.localPlayerController.transform.position, 2f, 1 << 21);
+            if (currentState == 1 && lighterLit && !lighterDead)
+            {
+                foreach (var obj in detectedObjects)
+                {
+                    if (obj.gameObject.name == "WebContainer")
+                    {
+                        var web = obj.gameObject.GetComponent<SandSpiderWebTrap>();
+
+                        if (IsHost)
+                        {
+                            web.mainScript.BreakWebClientRpc(web.transform.position, (int)GameNetworkManager.Instance.localPlayerController.playerClientId);
+                        }
+                        else
+                        {
+                            web.mainScript.BreakWebServerRpc(web.trapID, (int)GameNetworkManager.Instance.localPlayerController.playerClientId);
+                        }
+                        fireSpawnServerRpc(web.centerOfWeb.position);
+                        fuel -= UnityEngine.Random.Range(30, 60);
+                    }
+                }
+            }
+
+            if (currentState == 1 && !pocketingItem)
             {
                 timerDelay += Time.deltaTime;
                 if (!lighterDead)
@@ -105,21 +140,21 @@ namespace AbandonedCompanyAssets.itemStuff
                     fuel -= Time.deltaTime;
                 }
             }
-            if (timerDelay > 0.9 && currentState == 0)
+            if (timerDelay > 0.9 && currentState == 1)
             {
                 lighterOnServerRpc();
+                lighterLit = true;
             }
             if (fuel <= 0 && !lighterDead)
             {
+                currentState = 0;
                 lighterDeadServerRpc();
-                lighterClientRpc();
-
+                lighterServerRpc();
             }
-
         }
 
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void lighterOnServerRpc()
         {
             lighterOnClientRpc();
@@ -139,25 +174,7 @@ namespace AbandonedCompanyAssets.itemStuff
             }
 
         }
-        [ServerRpc]
-        private void lighterOffServerRpc()
-        {
-            lighterOffClientRpc();
-        }
-        [ClientRpc]
-        private void lighterOffClientRpc()
-        {
-            lighting.enabled = false;
-            this.flame.Clear();
-            this.flame.Stop();
-            this.gameObject.transform.GetChild(1).gameObject.SetActive(false);
-            this.gameObject.transform.GetChild(0).gameObject.SetActive(true);
-            this.audioSource.PlayOneShot(lighterClose);
-            audioSource.loop = false;
-            lighterLit = false;
-            currentState = 1;
-        }
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void lighterServerRpc()
         {
             lighterClientRpc();
@@ -177,8 +194,7 @@ namespace AbandonedCompanyAssets.itemStuff
                 audioSource.Stop();
                 { audioSource.PlayOneShot(lighterClose); }
                 lighting.enabled = false;
-                currentState = 1;
-
+                lighterLit = false;
             }
             else
             {
@@ -187,13 +203,11 @@ namespace AbandonedCompanyAssets.itemStuff
                     this.gameObject.transform.GetChild(0).gameObject.SetActive(false);
                     this.gameObject.transform.GetChild(1).gameObject.SetActive(true);
                 }
-
                 audioSource.PlayOneShot(lighterFlick);
-                currentState = 0;
             }
         }
 
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void lighterDeadServerRpc()
         {
             lighterDeadClientRpc();
@@ -203,6 +217,17 @@ namespace AbandonedCompanyAssets.itemStuff
         {
             this.fuel = 0;
             this.lighterDead = true;
+        }
+        [ServerRpc(RequireOwnership = false)]
+        private void fireSpawnServerRpc(Vector3 position)
+        {
+            fireSpawnClientRpc(position);
+        }
+        [ClientRpc]
+        private void fireSpawnClientRpc(Vector3 position)
+        {
+            GameObject newObject = UnityEngine.Object.Instantiate(Plugin.webBurnParticles.gameObject, position, new Quaternion(), StartOfRound.Instance.propsContainer);
+
         }
     }
 }

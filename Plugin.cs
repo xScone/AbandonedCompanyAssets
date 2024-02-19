@@ -55,6 +55,7 @@ namespace AbandonedCompanyAssets
         public static Item glowstick = assetCall.bundle.LoadAsset<Item>("Assets/Items/glowstick/glowstickItem.asset");
         public static Item GlowstickDroppedItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/glowstick/glowstickItem(Dropped).asset");
         public static Item lighter = assetCall.bundle.LoadAsset<Item>("Assets/Items/lighter/Lighter.asset");
+        public static GameObject webBurnParticles = assetCall.bundle.LoadAsset<GameObject>("Assets/Items/lighter/webFire.prefab");
         public static Plugin instance;
 
 
@@ -76,6 +77,8 @@ namespace AbandonedCompanyAssets
         {
             instance = this;
             ACALog = Logger;
+
+            //CobwebCollisionPatch.Init();
 
             var types = Assembly.GetExecutingAssembly().GetTypes();
             foreach (var type in types)
