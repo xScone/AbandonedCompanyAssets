@@ -57,6 +57,8 @@ namespace AbandonedCompanyAssets
         public static Item lighter = assetCall.bundle.LoadAsset<Item>("Assets/Items/lighter/Lighter.asset");
         public static Item bulletLighter = assetCall.bundle.LoadAsset<Item>("Assets/Items/bulletLighter/bulletLighter.asset");
         public static GameObject webBurnParticles = assetCall.bundle.LoadAsset<GameObject>("Assets/Items/lighter/webFire.prefab");
+        public static Item signalFlareItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/emergencyFlare/signalFlareItem.asset");
+        public static GameObject signalFlareParticles = assetCall.bundle.LoadAsset<GameObject>("Assets/Items/emergencyFlare/signalFlare (1) 1.prefab");
         public static Plugin instance;
 
 
@@ -108,17 +110,26 @@ namespace AbandonedCompanyAssets
             NetworkPrefabs.RegisterNetworkPrefab(glowstick.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(GlowstickDroppedItem.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(lighter.spawnPrefab);
+            NetworkPrefabs.RegisterNetworkPrefab(webBurnParticles);
             NetworkPrefabs.RegisterNetworkPrefab(bulletLighter.spawnPrefab);
+            NetworkPrefabs.RegisterNetworkPrefab(signalFlareItem.spawnPrefab);
+            NetworkPrefabs.RegisterNetworkPrefab(signalFlareParticles);
+            
+            
             Utilities.FixMixerGroups(candle.spawnPrefab);
             Utilities.FixMixerGroups(GlowstickDroppedItem.spawnPrefab);
             Utilities.FixMixerGroups(glowstick.spawnPrefab);
             Utilities.FixMixerGroups(lighter.spawnPrefab);
             Utilities.FixMixerGroups(bulletLighter.spawnPrefab);
+            Utilities.FixMixerGroups(bulletLighter.spawnPrefab);
+            Utilities.FixMixerGroups(signalFlareItem.spawnPrefab);
+            Utilities.FixMixerGroups(webBurnParticles);
+            Utilities.FixMixerGroups(signalFlareParticles);
 
             Items.RegisterScrap(GlowstickDroppedItem, (int)spawnRate.Legendary, (LevelTypes)(-1));
             Items.RegisterScrap(candle, (int)spawnRate.Epic, (LevelTypes)(-1));
             Items.RegisterScrap(lighter, (int)spawnRate.Rare, (LevelTypes)(-1));
-            Items.RegisterScrap(bulletLighter, (int)spawnRate.Cheating, (LevelTypes)(-1));
+            Items.RegisterScrap(bulletLighter, 2, (LevelTypes)(-1));
 
 
             lighter.toolTips = new string[] { "Light Flip Lighter : [LMB]" };
@@ -131,16 +142,16 @@ namespace AbandonedCompanyAssets
             TerminalNode node = ScriptableObject.CreateInstance<TerminalNode>();
             node.clearPreviousText = true;
             node.displayText = "The Candle. A cheap but extremely unreliable method of lighting your way. The Company is not responsible for any fires.\n\n";
-            TerminalNode node2 = ScriptableObject.CreateInstance<TerminalNode>();
+            /*/TerminalNode node2 = ScriptableObject.CreateInstance<TerminalNode>();
             node.clearPreviousText = true;
-            node.displayText = "A stack of glowing sticks! The glowsticks do not produce much light, however come in VERY handy for keeping track of your path, they wont stay lit long so be quick! Some creatures may be interested in them, however.\n\n";
+            node.displayText = "A stack of glowing sticks! The glowsticks do not produce much light, however come in VERY handy for keeping track of your path, they wont stay lit long so be quick! Some creatures may be interested in them, however.\n\n";/*/
+            /*/TerminalNode node3 = ScriptableObject.CreateInstance<TerminalNode>();
+            node.clearPreviousText = true;
+            node.displayText = "An Emergency Signal Flare. Only to be used in the most dire of situations, this flare can be used to warn other employees or light the surrounding area in a bright red light. Caution advised when using. \n\n";/*/
 
-            
-
-
-
-            Items.RegisterShopItem(candle, null, null, node, 7);
-            Items.RegisterShopItem(glowstick, null, null, node2, 20);
+            Items.RegisterShopItem(candle,null, null, node, 7);
+            Items.RegisterShopItem(glowstick, 20);
+            Items.RegisterShopItem(signalFlareItem, 100);
 
             // Plugin startup logic
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");

@@ -1,29 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Netcode;
 using UnityEngine;
 
 namespace AbandonedCompanyAssets.Behaviours
 {
     internal class DimThenKill : MonoBehaviour
     {
-        private Light lightSource;
+        private Light lightsource;
+        public bool dimin;
+        public float killafterseconds;
+        private float time;
+        public float dimrate;
+        public float defaultrange;
+        public float dimindelay;
+        
 
         void Start ()
         {
-            lightSource = GetComponent<Light>();
+            lightsource = GetComponentInChildren<Light>();
+            Plugin.ACALog.LogInfo(defaultrange);
+            
+            if (dimrate == 0 ) 
+            {
+                dimrate = 0.005f;
+            }
         }
 
         void Update ()
         {
-            if (lightSource.range > 0)
+            time += Time.deltaTime;
+            if (time > dimindelay && time < killafterseconds)
             {
-                lightSource.range -= 0.005f;
+                if (lightsource.range < defaultrange)
+                {
+                    lightsource.range += dimrate;
+                }
             }
-            else if (lightSource.range <= 0) 
+            if (time > killafterseconds)
             {
-                GameObject.Destroy(this);
+                if (lightsource.range > 0)
+                {
+                    lightsource.range -= dimrate;
+                }
+                else if (lightsource.range <= 0)
+                {
+					if  (this.gameObject.GetComponentInChildren<NetworkObject>().IsOwner)
+					{
+						deleteThisServerRpc();
+					}
+                }
             }
         }
-    }
+		[ServerRpc]
+		private void deleteThisServerRpc()
+		{
+			GameObject.Destroy(this.gameObject);
+		}
+	}
 }

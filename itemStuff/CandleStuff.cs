@@ -88,11 +88,20 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void Update()
         {
             base.Update();
+            if ((RoundManager.Instance.currentLevel.currentWeather == LevelWeatherType.Rainy) || (RoundManager.Instance.currentLevel.currentWeather == LevelWeatherType.Flooded))
+            {
+                if (!GameNetworkManager.Instance.localPlayerController.isInsideFactory && !GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom && currentlyLit)
+                {
+                    totalFailCount += 1;
+                    lightCandle(false, false);
+                }
+            }
+
             if (currentlyLit)
             {
                 if (randomFailTimeMax == 0 && totalFailCount < failNumber)
                 {
-                    randomFailTimeMax = Random.Range(90f, 500f);
+                    randomFailTimeMax = Random.Range(90f, 220f);
                 }
                 else if (totalFailCount < failNumber)
                 {
@@ -164,8 +173,25 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void ItemActivate(bool used, bool buttonDown = true)
         {
             base.ItemActivate(used, buttonDown);
+            if ((RoundManager.Instance.currentLevel.currentWeather == LevelWeatherType.Rainy) || (RoundManager.Instance.currentLevel.currentWeather == LevelWeatherType.Flooded))
+            {
+                if (!GameNetworkManager.Instance.localPlayerController.isInsideFactory && !GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom)
+                {
+                    totalFailCount += 1;
+                    audioSource.pitch = UnityEngine.Random.Range(0.4f, 0.6f);
+                    audioSource.PlayOneShot(blowFlame);
+
+                }
+                else
+                {
+                    lightCandle(false, false);
+                }
+            }
             Plugin.ACALog.LogInfo("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
-            lightCandle(false, false);
+            if (RoundManager.Instance.currentLevel.currentWeather != LevelWeatherType.Rainy)
+            {
+                lightCandle(false, false);
+            }
         }
 
         private void candleStart(bool startCandle)

@@ -15,19 +15,19 @@ namespace AbandonedCompanyAssets.itemStuff
     {
         private Light lighting;
         private ParticleSystem flame;
-        private AudioSource audioSource;
-        public AudioClip lighterFlick;
-        public AudioClip burningFlame;
-        public AudioClip lighterClose;
+        private AudioSource audiosource;
+        public AudioClip lighterflick;
+        public AudioClip burningflame;
+        public AudioClip lighterclose;
         public float fuel;
-        private int currentState;
-        private float timerDelay;
-        private bool lighterLit;
-        private float savedFuel;
-        private bool lighterDead;
-        private bool pocketingItem;
-        public bool usesFuelToWebBurn;
-        public bool getsExtraFuel;
+        private int currentstate;
+        private float timerdelay;
+        private bool lighterlit;
+        private float savedfuel;
+        private bool lighterdead;
+        private bool pocketingitem;
+        public bool usesfueltowebburn;
+        public bool getsextrafuel;
 
         public override void LoadItemSaveData(int saveData)
         {
@@ -36,11 +36,11 @@ namespace AbandonedCompanyAssets.itemStuff
             this.fuel = (float)saveData;
             if (saveData <= 0)
             {
-                lighterDead = true;
+                lighterdead = true;
             }
             else if (saveData > 0)
             {
-                savedFuel = (float)saveData;
+                savedfuel = (float)saveData;
             }
         }
         public override int GetItemDataToSave()
@@ -53,20 +53,18 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void Start()
         {
             base.Start();
-            currentState = 0;
+            currentstate = 0;
             lighting = GetComponentInChildren<Light>();
             flame = GetComponentInChildren<ParticleSystem>();
-            audioSource = GetComponentInChildren<AudioSource>();
+            audiosource = GetComponentInChildren<AudioSource>();
             this.GetComponentInChildren<GrabbableObject>().insertedBattery.charge = fuel;
-            lighterServerRpc();
-
-            if (savedFuel < 0)
+            if (savedfuel < 0)
             {
-                fuel = savedFuel;
+                fuel = savedfuel;
             }
-            else if (!lighterDead)
+            else if (!lighterdead)
             {
-                if (getsExtraFuel)
+                if (getsextrafuel)
                 {
                     fuel = UnityEngine.Random.Range(500, 2000);
                 }
@@ -75,45 +73,46 @@ namespace AbandonedCompanyAssets.itemStuff
                     fuel = UnityEngine.Random.Range(300, 1500);
                 }
             }
-
+            lighterServerRpc();
         }
 
         public override void ItemActivate(bool used, bool buttonDown = true)
         {
             base.ItemActivate(used, buttonDown);
-            if (currentState == 0)
+            if (currentstate == 0)
             {
-                currentState = 1;
+                currentstate = 1;
             }
             else
             {
-                currentState = 0;
+                currentstate = 0;
             }
-            timerDelay = 0;
+            timerdelay = 0;
             lighterServerRpc();
-            Plugin.ACALog.LogInfo(currentState);
+            Plugin.ACALog.LogInfo(currentstate);
 
 
         }
         public override void PocketItem()
         {
             base.PocketItem();
-            if (currentState == 1)
+            if (currentstate == 1)
             {
-                pocketingItem = true;
-                timerDelay = 0;
-                currentState = 0;
-                lighterServerRpc();
+                pocketingitem = true;
+                timerdelay = 0;
+                currentstate = 0;
+				lighterlit = false;
+				lighterServerRpc();
             }
 
         }
         public override void EquipItem()
         {
             base.EquipItem();
-            if (pocketingItem)
+            if (pocketingitem)
             {
-                currentState = 1;
-                pocketingItem = false;
+                currentstate = 1;
+                pocketingitem = false;
                 lighterServerRpc();
             }
         }
@@ -121,7 +120,7 @@ namespace AbandonedCompanyAssets.itemStuff
         {
             base.Update();
             var detectedObjects = Physics.OverlapSphere(GameNetworkManager.Instance.localPlayerController.transform.position, 2f, 1 << 21);
-            if (currentState == 1 && lighterLit && !lighterDead)
+            if (currentstate == 1 && lighterlit && !lighterdead)
             {
                 foreach (var obj in detectedObjects)
                 {
@@ -138,7 +137,7 @@ namespace AbandonedCompanyAssets.itemStuff
                             web.mainScript.BreakWebServerRpc(web.trapID, (int)GameNetworkManager.Instance.localPlayerController.playerClientId);
                         }
                         fireSpawnServerRpc(web.centerOfWeb.position);
-                        if (usesFuelToWebBurn)
+                        if (usesfueltowebburn)
                         {
                             fuel -= UnityEngine.Random.Range(30, 60);
                         }
@@ -146,22 +145,22 @@ namespace AbandonedCompanyAssets.itemStuff
                 }
             }
 
-            if (currentState == 1 && !pocketingItem)
+            if (currentstate == 1 && !pocketingitem)
             {
-                timerDelay += Time.deltaTime;
-                if (!lighterDead)
+                timerdelay += Time.deltaTime;
+                if (!lighterdead)
                 {
                     fuel -= Time.deltaTime;
                 }
             }
-            if (timerDelay > 0.9 && currentState == 1)
+            if (timerdelay > 0.9 && currentstate == 1)
             {
                 lighterOnServerRpc();
-                lighterLit = true;
+                lighterlit = true;
             }
-            if (fuel <= 0 && !lighterDead)
+            if (fuel <= 0 && !lighterdead)
             {
-                currentState = 0;
+                currentstate = 0;
                 lighterDeadServerRpc();
                 lighterServerRpc();
             }
@@ -180,11 +179,11 @@ namespace AbandonedCompanyAssets.itemStuff
             {
                 lighting.enabled = true;
                 this.flame.Play();
-                timerDelay = 0;
-                audioSource.clip = burningFlame;
-                audioSource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
-                audioSource.loop = true;
-                audioSource.Play();
+                timerdelay = 0;
+                audiosource.clip = burningflame;
+                audiosource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+                audiosource.loop = true;
+                audiosource.Play();
             }
 
         }
@@ -196,28 +195,28 @@ namespace AbandonedCompanyAssets.itemStuff
         [ClientRpc]
         private void lighterClientRpc()
         {
-            if (this.currentState == 0)
+            if (this.currentstate == 0)
             {
-                if (!pocketingItem)
+                if (!pocketingitem)
                 {
                     this.gameObject.transform.GetChild(1).gameObject.SetActive(false);
                     this.gameObject.transform.GetChild(0).gameObject.SetActive(true);
                 }
                 this.flame.Clear();
                 this.flame.Stop();
-                audioSource.Stop();
-                { audioSource.PlayOneShot(lighterClose); }
+                audiosource.Stop();
+                { audiosource.PlayOneShot(lighterclose); }
                 lighting.enabled = false;
-                lighterLit = false;
+                lighterlit = false;
             }
             else
             {
-                if (!pocketingItem)
+                if (!pocketingitem)
                 {
                     this.gameObject.transform.GetChild(0).gameObject.SetActive(false);
                     this.gameObject.transform.GetChild(1).gameObject.SetActive(true);
                 }
-                audioSource.PlayOneShot(lighterFlick);
+                audiosource.PlayOneShot(lighterflick);
             }
         }
 
@@ -230,7 +229,7 @@ namespace AbandonedCompanyAssets.itemStuff
         private void lighterDeadClientRpc()
         {
             this.fuel = 0;
-            this.lighterDead = true;
+            this.lighterdead = true;
         }
         [ServerRpc(RequireOwnership = false)]
         private void fireSpawnServerRpc(Vector3 position)
