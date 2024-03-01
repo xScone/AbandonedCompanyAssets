@@ -88,7 +88,7 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void Update()
         {
             base.Update();
-            if ((RoundManager.Instance.currentLevel.currentWeather == LevelWeatherType.Rainy) || (RoundManager.Instance.currentLevel.currentWeather == LevelWeatherType.Flooded))
+            if ((RoundManager.Instance.currentLevel.currentWeather == LevelWeatherType.Rainy) || (RoundManager.Instance.currentLevel.currentWeather == LevelWeatherType.Flooded) || (GameNetworkManager.Instance.localPlayerController.isUnderwater))
             {
                 if (!GameNetworkManager.Instance.localPlayerController.isInsideFactory && !GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom && currentlyLit)
                 {

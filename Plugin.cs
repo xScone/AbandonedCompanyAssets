@@ -22,13 +22,6 @@ using UnityEngine.UIElements;
 using Unity.Netcode;
 using NetworkPrefabs = LethalLib.Modules.NetworkPrefabs;
 
-//Pile POS: 0, 0.06, -0.025
-//Pile ROT: -15, 195, -10
-//Duo POS: 0, 0.1, -0.025
-//Duo ROT: -60, 195, -5
-//Single POS: -0.025, 0.1, 0
-//Single ROT: 0, 0, -90
-
 
 
 namespace AbandonedCompanyAssets
@@ -59,6 +52,7 @@ namespace AbandonedCompanyAssets
         public static GameObject webBurnParticles = assetCall.bundle.LoadAsset<GameObject>("Assets/Items/lighter/webFire.prefab");
         public static Item signalFlareItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/emergencyFlare/signalFlareItem.asset");
         public static GameObject signalFlareParticles = assetCall.bundle.LoadAsset<GameObject>("Assets/Items/emergencyFlare/signalFlare (1) 1.prefab");
+		public static Item abandonedflashlightitem = assetCall.bundle.LoadAsset<Item>("Assets/Items/bbflashlight/abandonedBBFlashlight.asset");
         public static Plugin instance;
 
 
@@ -97,14 +91,6 @@ namespace AbandonedCompanyAssets
                 }
             }
 
-
-            //Stuff for physics prop
-
-
-            
-
-
-
             //Item Stuff
             NetworkPrefabs.RegisterNetworkPrefab(candle.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(glowstick.spawnPrefab);
@@ -114,6 +100,7 @@ namespace AbandonedCompanyAssets
             NetworkPrefabs.RegisterNetworkPrefab(bulletLighter.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(signalFlareItem.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(signalFlareParticles);
+			NetworkPrefabs.RegisterNetworkPrefab(abandonedflashlightitem.spawnPrefab);
             
             
             Utilities.FixMixerGroups(candle.spawnPrefab);
@@ -125,11 +112,13 @@ namespace AbandonedCompanyAssets
             Utilities.FixMixerGroups(signalFlareItem.spawnPrefab);
             Utilities.FixMixerGroups(webBurnParticles);
             Utilities.FixMixerGroups(signalFlareParticles);
+			Utilities.FixMixerGroups(abandonedflashlightitem.spawnPrefab);
 
             Items.RegisterScrap(GlowstickDroppedItem, (int)spawnRate.Legendary, (LevelTypes)(-1));
             Items.RegisterScrap(candle, (int)spawnRate.Epic, (LevelTypes)(-1));
             Items.RegisterScrap(lighter, (int)spawnRate.Rare, (LevelTypes)(-1));
             Items.RegisterScrap(bulletLighter, 2, (LevelTypes)(-1));
+			Items.RegisterScrap(abandonedflashlightitem, (int)spawnRate.Cheating, (LevelTypes)(-1));
 
 
             lighter.toolTips = new string[] { "Light Flip Lighter : [LMB]" };
@@ -139,6 +128,7 @@ namespace AbandonedCompanyAssets
             CandleStuff.minFail = 1;
             CandleStuff.maxFail = 4;
 
+			//Figure out how to fix this at some point. Temp fix for now.
             TerminalNode node = ScriptableObject.CreateInstance<TerminalNode>();
             node.clearPreviousText = true;
             node.displayText = "The Candle. A cheap but extremely unreliable method of lighting your way. The Company is not responsible for any fires.\n\n";

@@ -31,7 +31,7 @@ namespace AbandonedCompanyAssets.itemStuff
             base.Start();
             this.GetComponentInChildren<GrabbableObject>().insertedBattery.charge = 560;
             lighting = GetComponentInChildren<Light>();
-            Plugin.ACALog.LogInfo("STARTASTATASETASTASTDGA,");
+            Plugin.ACALog.LogInfo("Glowstick Spawned.");
             base.EnablePhysics(true);
             base.EnableItemMeshes(true);
         }
@@ -99,11 +99,7 @@ namespace AbandonedCompanyAssets.itemStuff
             {
                 currentState += 1;
             }/*/
-
-
-
-
-            Plugin.ACALog.LogInfo("AGAGAGDSAGHFASHPOKAGMDAOFPIGJKMPADF0OGL,");
+            Plugin.ACALog.LogInfo("Glowstick Used.");
 			if (!droppedStick)
 			{
 				GlowstickSpawnServerRpc(gameObject.transform.position, GameNetworkManager.Instance.localPlayerController.transform.rotation);

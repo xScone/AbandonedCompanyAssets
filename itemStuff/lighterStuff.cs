@@ -114,11 +114,18 @@ namespace AbandonedCompanyAssets.itemStuff
                 currentstate = 1;
                 pocketingitem = false;
                 lighterServerRpc();
-            }
+				lighterServerRpc();
+
+			}
         }
         public override void Update()
         {
             base.Update();
+			if (GameNetworkManager.Instance.localPlayerController.isUnderwater && !lighterdead)
+			{
+				lighterDeadServerRpc();
+				currentstate = 0;
+			}
             var detectedObjects = Physics.OverlapSphere(GameNetworkManager.Instance.localPlayerController.transform.position, 2f, 1 << 21);
             if (currentstate == 1 && lighterlit && !lighterdead)
             {
