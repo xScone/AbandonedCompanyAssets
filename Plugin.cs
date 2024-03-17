@@ -1,26 +1,13 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using LethalLib.Modules;
-using HarmonyLib;
-using System;
 using UnityEngine;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using HarmonyLib.Tools;
-using LethalLib;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Versioning;
 using static LethalLib.Modules.Levels;
-using AbandonedCompanyAssets.Behaviours;
 using AbandonedCompanyAssets.itemStuff;
-using AbandonedCompanyAssets.Patches;
-using UnityEngine.Yoga;
-using Steamworks.Ugc;
-using UnityEngine.UIElements;
-using Unity.Netcode;
 using NetworkPrefabs = LethalLib.Modules.NetworkPrefabs;
+using System.Transactions;
 
 
 
@@ -53,11 +40,27 @@ namespace AbandonedCompanyAssets
         public static Item signalFlareItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/emergencyFlare/signalFlareItem.asset");
         public static GameObject signalFlareParticles = assetCall.bundle.LoadAsset<GameObject>("Assets/Items/emergencyFlare/signalFlare (1) 1.prefab");
 		public static Item abandonedflashlightitem = assetCall.bundle.LoadAsset<Item>("Assets/Items/bbflashlight/abandonedBBFlashlight.asset");
+		public static Item industrialflashlightitem = assetCall.bundle.LoadAsset<Item>("Assets/Items/industrialflashlight/industrialFlashlightItem.asset");
+		public static Item proabaondedflashlightitem = assetCall.bundle.LoadAsset<Item>("Assets/Items/proflashlight/ProAbandonedFlashlight.asset");
+		public static Item abandonedWalkieItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/AbandonedWalkie/AbandonedWalkieItem.asset");
         public static Plugin instance;
+		private static bool EnableFlare = true;
+		private static bool EnableGlowsticks = true;
+		private static bool EnableRandomGlowsticks = true;
+		private static bool EnableLighter = true;
+		private static bool EnableDungeonCandle = true;
+		private static bool EnableShopCandle = true;
+		private static bool EnableAbandonedFlashlight = true;
+		private static bool FlareCompatName = false;
+		private static bool EnableIndustrialFlashlight = true;
+		private static bool EnableProAbandonedFlashlight = true;
+		private static bool EnableAbandonedWalkie = true;
 
 
-        
-        private enum spawnRate
+
+
+
+		private enum spawnRate
         {
             Legendary = 5,
             Epic = 10,
@@ -75,9 +78,11 @@ namespace AbandonedCompanyAssets
             instance = this;
             ACALog = Logger;
 
-            //CobwebCollisionPatch.Init();
+			loadConfig();
 
-            var types = Assembly.GetExecutingAssembly().GetTypes();
+			//CobwebCollisionPatch.Init();
+
+			var types = Assembly.GetExecutingAssembly().GetTypes();
             foreach (var type in types)
             {
                 var methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
@@ -101,9 +106,13 @@ namespace AbandonedCompanyAssets
             NetworkPrefabs.RegisterNetworkPrefab(signalFlareItem.spawnPrefab);
             NetworkPrefabs.RegisterNetworkPrefab(signalFlareParticles);
 			NetworkPrefabs.RegisterNetworkPrefab(abandonedflashlightitem.spawnPrefab);
-            
-            
-            Utilities.FixMixerGroups(candle.spawnPrefab);
+			NetworkPrefabs.RegisterNetworkPrefab(industrialflashlightitem.spawnPrefab);
+			NetworkPrefabs.RegisterNetworkPrefab(proabaondedflashlightitem.spawnPrefab);
+			NetworkPrefabs.RegisterNetworkPrefab(abandonedWalkieItem.spawnPrefab);
+
+
+
+			Utilities.FixMixerGroups(candle.spawnPrefab);
             Utilities.FixMixerGroups(GlowstickDroppedItem.spawnPrefab);
             Utilities.FixMixerGroups(glowstick.spawnPrefab);
             Utilities.FixMixerGroups(lighter.spawnPrefab);
@@ -113,15 +122,28 @@ namespace AbandonedCompanyAssets
             Utilities.FixMixerGroups(webBurnParticles);
             Utilities.FixMixerGroups(signalFlareParticles);
 			Utilities.FixMixerGroups(abandonedflashlightitem.spawnPrefab);
+			Utilities.FixMixerGroups(industrialflashlightitem.spawnPrefab);
+			Utilities.FixMixerGroups(proabaondedflashlightitem.spawnPrefab);
+			Utilities.FixMixerGroups(abandonedWalkieItem.spawnPrefab);
 
-            Items.RegisterScrap(GlowstickDroppedItem, (int)spawnRate.Legendary, (LevelTypes)(-1));
-            Items.RegisterScrap(candle, (int)spawnRate.Epic, (LevelTypes)(-1));
-            Items.RegisterScrap(lighter, (int)spawnRate.Rare, (LevelTypes)(-1));
-            Items.RegisterScrap(bulletLighter, 2, (LevelTypes)(-1));
-			Items.RegisterScrap(abandonedflashlightitem, (int)spawnRate.Cheating, (LevelTypes)(-1));
+			if (EnableGlowsticks) { Items.RegisterScrap(GlowstickDroppedItem, (int)spawnRate.Legendary, (LevelTypes)(-1)); }
+            if (EnableDungeonCandle) { Items.RegisterScrap(candle, (int)spawnRate.Epic, (LevelTypes)(-1)); }
+            if (EnableLighter) 
+			{ 
+				Items.RegisterScrap(lighter, (int)spawnRate.Rare, (LevelTypes)(-1));
+				Items.RegisterScrap(bulletLighter, 2, (LevelTypes)(-1));
+			}
+            if (EnableAbandonedFlashlight) { Items.RegisterScrap(abandonedflashlightitem, (int)spawnRate.Uncommon, (LevelTypes)(-1)); }
+			if (EnableIndustrialFlashlight) { Items.RegisterScrap(industrialflashlightitem, (int)spawnRate.Legendary, (LevelTypes)(-1)); }
+			if (EnableProAbandonedFlashlight) { Items.RegisterScrap(proabaondedflashlightitem, (int)spawnRate.Rare, (LevelTypes)(-1)); }
+			if (EnableAbandonedWalkie) { Items.RegisterScrap(abandonedWalkieItem, (int)spawnRate.Legendary, (LevelTypes)(-1));  }
+			
 
 
-            lighter.toolTips = new string[] { "Light Flip Lighter : [LMB]" };
+
+
+
+			lighter.toolTips = new string[] { "Light Flip Lighter : [LMB]" };
             bulletLighter.toolTips = new string[] { "Light Bullet Lighter : [LMB]" };
             candle.toolTips = new string[] { "Use item : [LMB]" };
             glowstick.toolTips = new string[] { "Drop Glowstick : [LMB]" };
@@ -138,13 +160,29 @@ namespace AbandonedCompanyAssets
             /*/TerminalNode node3 = ScriptableObject.CreateInstance<TerminalNode>();
             node.clearPreviousText = true;
             node.displayText = "An Emergency Signal Flare. Only to be used in the most dire of situations, this flare can be used to warn other employees or light the surrounding area in a bright red light. Caution advised when using. \n\n";/*/
-
-            Items.RegisterShopItem(candle,null, null, node, 7);
-            Items.RegisterShopItem(glowstick, 20);
-            Items.RegisterShopItem(signalFlareItem, 100);
+			if (EnableShopCandle) { Items.RegisterShopItem(candle, null, null, node, 7); }
+            if (EnableRandomGlowsticks) { Items.RegisterShopItem(glowstick, 15); }
+			if (EnableFlare) { Items.RegisterShopItem(signalFlareItem, 100); }
+			if (FlareCompatName) { signalFlareItem.itemName = "Military Flare"; }
+			
 
             // Plugin startup logic
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }
+		private void loadConfig()
+		{
+			EnableFlare = Config.Bind<bool>("General", "EnableFlare", true, "Should the Emergency Flare be available in the shop?").Value;
+			EnableGlowsticks = Config.Bind<bool>("General", "EnableGlowsticks", true, "Should the Glowsticks be available in the shop?").Value;
+			EnableLighter = Config.Bind<bool>("General", "EnableLighter", true, "Should the Lighters spawn in the dungeon?").Value;
+			EnableShopCandle = Config.Bind<bool>("General", "EnableShopCandle", true, "Should the Antique Candles be available in the shop?").Value;
+			EnableDungeonCandle = Config.Bind<bool>("General", "EnableDungeonCandle", true, "Should the Antique Candles spawn in the dungeon?").Value;
+			EnableAbandonedFlashlight = Config.Bind<bool>("General", "EnableBBFlashlight", true, "Should the Abandoned Flashlights spawn in the dungeon?").Value;
+			EnableRandomGlowsticks = Config.Bind<bool>("General", "EnableRandomGlowsticks", true, "Should the random glowsticks spawn in the dungeon?").Value;
+			FlareCompatName = Config.Bind<bool>("Extra", "EnableFlareCompatibilityName", false, "Should the Emergency Flare's name be changed to improve compatibility?").Value;
+			EnableIndustrialFlashlight = Config.Bind<bool>("General", "EnableIndustrialFlashlight", true, "Should the Industrial Flashlight spawn in the dungeon?").Value;
+			EnableProAbandonedFlashlight = Config.Bind<bool>("General", "EnableProAbandonedFlashlight", true, "Should the Abandoned Pro-Flashlight spawn in the dungeon?").Value;
+			EnableAbandonedWalkie = Config.Bind<bool>("General", "EnableAbandonedWalkieTalkie", true, "Should the Abandoned Walkie-Talkie spawn in the dungeon?").Value;
+
+		}
     }
 }

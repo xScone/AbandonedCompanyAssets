@@ -121,10 +121,13 @@ namespace AbandonedCompanyAssets.itemStuff
         public override void Update()
         {
             base.Update();
-			if (GameNetworkManager.Instance.localPlayerController.isUnderwater && !lighterdead)
-			{
-				lighterDeadServerRpc();
-				currentstate = 0;
+            if (isHeld)
+            {
+				if (GameNetworkManager.Instance.localPlayerController.isUnderwater && !lighterdead)
+				{
+					lighterDeadServerRpc();
+					currentstate = 0;
+				}
 			}
             var detectedObjects = Physics.OverlapSphere(GameNetworkManager.Instance.localPlayerController.transform.position, 2f, 1 << 21);
             if (currentstate == 1 && lighterlit && !lighterdead)
@@ -137,7 +140,7 @@ namespace AbandonedCompanyAssets.itemStuff
 
                         if (IsHost)
                         {
-                            web.mainScript.BreakWebClientRpc(web.transform.position, (int)GameNetworkManager.Instance.localPlayerController.playerClientId);
+                            web.mainScript.BreakWebClientRpc(web.transform.position, web.trapID);
                         }
                         else
                         {
@@ -247,8 +250,6 @@ namespace AbandonedCompanyAssets.itemStuff
         private void fireSpawnClientRpc(Vector3 position)
         {
             GameObject newObject = UnityEngine.Object.Instantiate(Plugin.webBurnParticles.gameObject, position, new Quaternion(), StartOfRound.Instance.propsContainer);
-
         }
-        
     }
 }
