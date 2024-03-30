@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2066005718
+CRC: 128929791
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: dbea00f59a008cfa705738b6323c0166
+    Hash: b009ea7ff2892cbd8711c0aa93498cff
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 5eb98f1f11432c114c1314e80053a341
+    Hash: 3105eda62e532298369365208e1c8115
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: dbea00f59a008cfa705738b6323c0166
+    Hash: b009ea7ff2892cbd8711c0aa93498cff
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -39,12 +39,42 @@ ClassTypes:
 - Class: 114
   Script: {fileID: 11500000, guid: 7a68c43fe1f2a47cfa234b5eeaa98012, type: 3}
 - Class: 114
+  Script: {fileID: 11500000, guid: 04f75356a7e9c978bddc7d568e58a50b, type: 3}
+- Class: 114
   Script: {fileID: 11500000, guid: c30496d6ae6d6f907456e10a94e01ec6, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: 3c36d0a92cbb1f26a39169ef0eae393a, type: 3}
 - Class: 114
   Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+- Class: 114
+  Script: {fileID: 1913010872, guid: e4290146f814c284fbb1df601ba04579, type: 3}
+- Class: 114
+  Script: {fileID: 1408203433, guid: e4290146f814c284fbb1df601ba04579, type: 3}
+- Class: 114
+  Script: {fileID: 619181763, guid: e4290146f814c284fbb1df601ba04579, type: 3}
+- Class: 114
+  Script: {fileID: -1740383108, guid: e4290146f814c284fbb1df601ba04579, type: 3}
+- Class: 114
+  Script: {fileID: -183608366, guid: e4290146f814c284fbb1df601ba04579, type: 3}
+- Class: 114
+  Script: {fileID: 1093639797, guid: e4290146f814c284fbb1df601ba04579, type: 3}
+- Class: 114
+  Script: {fileID: 1026608991, guid: e4290146f814c284fbb1df601ba04579, type: 3}
+- Class: 114
+  Script: {fileID: -950121300, guid: e4290146f814c284fbb1df601ba04579, type: 3}
+- Class: 114
+  Script: {fileID: -817845420, guid: e4290146f814c284fbb1df601ba04579, type: 3}
+- Class: 114
+  Script: {fileID: 1045347260, guid: e4290146f814c284fbb1df601ba04579, type: 3}
 - Class: 115
+  Script: {instanceID: 0}
+- Class: 135
+  Script: {instanceID: 0}
+- Class: 165
+  Script: {instanceID: 0}
+- Class: 169
+  Script: {instanceID: 0}
+- Class: 170
   Script: {instanceID: 0}
 - Class: 198
   Script: {instanceID: 0}
@@ -59,19 +89,39 @@ ClassTypes:
 - Class: 245
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers:
+- AssemblyName: Assembly-CSharp
+  ClassName: Battery
 - AssemblyName: Unity.RenderPipelines.HighDefinition.Runtime
   ClassName: UnityEngine.Rendering.HighDefinition.BoolScalableSettingValue
 - AssemblyName: Unity.RenderPipelines.HighDefinition.Runtime
   ClassName: UnityEngine.Rendering.HighDefinition.IntScalableSettingValue
 Assets:
-- Assets/Working Shit/candleItem.asset
-- Assets/Working Shit/glowstickSnap 1.wav
-- Assets/Working Shit/glowstickItem.asset
-- Assets/Ripped Assets/AudioClip/LightCandle.ogg
-- Assets/Ripped Assets/AudioClip/LightCandleBlow.ogg
-- Assets/Ripped Assets/AudioClip/CandleFlame.ogg
-- Assets/Working Shit/Glowstick Pile 3.prefab
-- Assets/Working Shit/droppableGlowstick.prefab
-- Assets/Working Shit/glowstickIcon.png
-- Assets/Working Shit/Glowstick.prefab
+- Assets/Items/candle/candleItem.asset
+- Assets/Items/emergencyFlare/signalFlareItem.asset
+- Assets/Items/glowstick/Imports/glowstickSnap 1.wav
+- Assets/Items/proflashlight/proAbandonedFlashlight.asset
+- Assets/Items/bbflashlight/flashlight bulb explode.wav
+- Assets/Items/industrialflashlight/industrialFlashlightItem.asset
+- Assets/Items/emergencyFlare/flareExplosion.wav
+- Assets/Items/bbflashlight/flashlight flicker.wav
+- Assets/Items/glowstick/glowstickItem.asset
+- Assets/Items/lighter/Lighter.asset
+- Assets/Items/glowstick/Imports/glowstickIcon.png
+- Assets/Items/glowstick/glowstickItem(Dropped).asset
+- Assets/Items/glowstick/Metal.mat
+- Assets/Items/glowstick/Glowstick.mat
+- Assets/Items/glowstick/Glowstick Pile 3.prefab
+- Assets/Items/AbandonedWalkie/abandonedwalkie.fbx
+- Assets/Items/candle/candleIcon.png
+- Assets/Items/TZP-Abandoned/AbandonedTZPItem.asset
+- Assets/Items/glowstick/droppableGlowstick.prefab
+- Assets/Items/AbandonedWalkie/AbandonedWalkieItem.asset
+- Assets/Items/emergencyFlare/signalFlare (1) 1.prefab
+- Assets/Items/glowstick/reference.prefab
+- Assets/Items/emergencyFlare/flareLoop.wav
+- Assets/Items/bulletLighter/bulletLighter.asset
+- Assets/Items/glowstick/Glowstick 1.mat
+- Assets/Items/lighter/webFire.prefab
+- Assets/Items/AbandonedWalkie/AbandonedWalkiePrefab.prefab
+- Assets/Items/bbflashlight/abandonedBBFlashlight.asset
 Dependencies: []

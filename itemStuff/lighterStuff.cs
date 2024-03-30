@@ -73,7 +73,10 @@ namespace AbandonedCompanyAssets.itemStuff
                     fuel = UnityEngine.Random.Range(300, 1500);
                 }
             }
-            lighterServerRpc();
+			if (IsOwnedByServer)
+			{
+				lighterServerRpc();
+			}
         }
 
         public override void ItemActivate(bool used, bool buttonDown = true)
@@ -88,7 +91,10 @@ namespace AbandonedCompanyAssets.itemStuff
                 currentstate = 0;
             }
             timerdelay = 0;
-            lighterServerRpc();
+			if (IsOwner)
+			{
+				lighterServerRpc();
+			}
             Plugin.ACALog.LogInfo(currentstate);
 
 
@@ -102,7 +108,11 @@ namespace AbandonedCompanyAssets.itemStuff
                 timerdelay = 0;
                 currentstate = 0;
 				lighterlit = false;
-				lighterServerRpc();
+				if (IsOwner)
+				{
+					lighterServerRpc();
+				}
+					
             }
 
         }
@@ -113,9 +123,10 @@ namespace AbandonedCompanyAssets.itemStuff
             {
                 currentstate = 1;
                 pocketingitem = false;
-                lighterServerRpc();
-				lighterServerRpc();
-
+				if (IsOwner)
+				{
+					lighterServerRpc();
+				}
 			}
         }
         public override void Update()
@@ -138,15 +149,18 @@ namespace AbandonedCompanyAssets.itemStuff
                     {
                         var web = obj.gameObject.GetComponent<SandSpiderWebTrap>();
 
-                        if (IsHost)
+                        if (IsHost && web != null)
                         {
                             web.mainScript.BreakWebClientRpc(web.transform.position, web.trapID);
                         }
-                        else
+                        else if (web != null)
                         {
                             web.mainScript.BreakWebServerRpc(web.trapID, (int)GameNetworkManager.Instance.localPlayerController.playerClientId);
                         }
-                        fireSpawnServerRpc(web.centerOfWeb.position);
+						if (IsOwner)
+						{
+							fireSpawnServerRpc(web.centerOfWeb.position);
+						}
                         if (usesfueltowebburn)
                         {
                             fuel -= UnityEngine.Random.Range(30, 60);
@@ -165,19 +179,26 @@ namespace AbandonedCompanyAssets.itemStuff
             }
             if (timerdelay > 0.9 && currentstate == 1)
             {
-                lighterOnServerRpc();
+				if (IsOwner)
+				{
+					lighterOnServerRpc();
+				}
+                
                 lighterlit = true;
             }
             if (fuel <= 0 && !lighterdead)
             {
                 currentstate = 0;
-                lighterDeadServerRpc();
-                lighterServerRpc();
+				if (IsOwner)
+				{
+					lighterDeadServerRpc();
+					lighterServerRpc();
+				}
             }
         }
 
 
-        [ServerRpc(RequireOwnership = false)]
+        [ServerRpc]
         private void lighterOnServerRpc()
         {
             lighterOnClientRpc();
@@ -187,17 +208,21 @@ namespace AbandonedCompanyAssets.itemStuff
         {
             if (this.fuel > 5)
             {
-                lighting.enabled = true;
-                this.flame.Play();
-                timerdelay = 0;
-                audiosource.clip = burningflame;
-                audiosource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
-                audiosource.loop = true;
-                audiosource.Play();
+				lighting.enabled = true;
+				this.flame.Play();
+				timerdelay = 0;
+				if (IsOwner)
+				{
+					audiosource.clip = burningflame;
+					audiosource.pitch = UnityEngine.Random.Range(0.9f, 1.1f);
+					audiosource.loop = true;
+					audiosource.Play();
+				}
+                
             }
 
         }
-        [ServerRpc(RequireOwnership = false)]
+        [ServerRpc]
         private void lighterServerRpc()
         {
             lighterClientRpc();
@@ -214,8 +239,11 @@ namespace AbandonedCompanyAssets.itemStuff
                 }
                 this.flame.Clear();
                 this.flame.Stop();
-                audiosource.Stop();
-                { audiosource.PlayOneShot(lighterclose); }
+				if (IsOwner)
+				{
+					audiosource.Stop();
+					{ audiosource.PlayOneShot(lighterclose); }
+				}
                 lighting.enabled = false;
                 lighterlit = false;
             }
@@ -226,7 +254,10 @@ namespace AbandonedCompanyAssets.itemStuff
                     this.gameObject.transform.GetChild(0).gameObject.SetActive(false);
                     this.gameObject.transform.GetChild(1).gameObject.SetActive(true);
                 }
-                audiosource.PlayOneShot(lighterflick);
+				if (IsOwner)
+				{
+					audiosource.PlayOneShot(lighterflick);
+				}
             }
         }
 

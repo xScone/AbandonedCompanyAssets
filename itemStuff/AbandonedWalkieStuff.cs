@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem.Controls;
 
@@ -23,23 +24,14 @@ namespace AbandonedCompanyAssets.itemStuff
 		public override void LoadItemSaveData(int saveData)
 		{
 			base.LoadItemSaveData(saveData);
-			short val1 = (short)(saveData >> 16);
-			short val2 = (short)(saveData & 0xFFFF);
-			//Plugin.ACALog.LogInfo("loaded battery: " + val2);
-			this.randomtrait = (int)val1;
-			saveData = 0;
-
+			Plugin.ACALog.LogInfo("Load Data:" + (saveData));
+			this.randomtrait = (int)saveData;
 		}
 		public override int GetItemDataToSave()
 		{
 			base.GetItemDataToSave();
-			Plugin.ACALog.LogInfo(this.gameObject.GetComponent<FlashlightItem>().insertedBattery.charge);
-			short int1 = (short)randomtrait;
-			short int2 = 0;
-
-			int combined = (int1 << 16) | (int2 & 0XFFFF);
-			return combined;
-
+			Plugin.ACALog.LogInfo("Save Data:" + randomtrait);
+			return randomtrait;
 		}
 		public override void Start()
 		{
@@ -69,7 +61,17 @@ namespace AbandonedCompanyAssets.itemStuff
 				{
 					if (randomtrait == 1)
 					{
-						this.gameObject.GetComponentByName("Target").GetComponent<AudioDistortionFilter>().distortionLevel = 0.7f;
+						if (this.gameObject.GetComponentByName("Target").GetComponent<AudioDistortionFilter>() != null)
+						{
+							this.gameObject.GetComponentByName("Target").GetComponent<AudioDistortionFilter>().distortionLevel = 0.7f;
+						}
+						else
+						{
+							if (IsOwner)
+							{
+								generateTraitServerRpc();
+							}
+						}
 					}
 					if (randomtrait == 2)
 					{
@@ -102,7 +104,7 @@ namespace AbandonedCompanyAssets.itemStuff
 					}
 					if (randomtrait == 6)
 					{
-						if (!isBeingUsed)
+						if (!isBeingUsed && this.gameObject.GetComponent<WalkieTalkie>().insertedBattery.charge > 0)
 						{
 							this.gameObject.GetComponent<WalkieTalkie>().insertedBattery.charge -= Time.deltaTime / 350;
 						}
@@ -116,9 +118,10 @@ namespace AbandonedCompanyAssets.itemStuff
 			base.GrabItem();
 			if (!traitGenerated || randomtrait == 0)
 			{
-				randomtrait = UnityEngine.Random.Range(1, 9);
-				traitGenerated = true;
-				Plugin.ACALog.LogInfo(randomtrait);
+				if (IsOwner)
+				{
+					generateTraitServerRpc();
+				}
 			}
 			
 		}
@@ -133,6 +136,19 @@ namespace AbandonedCompanyAssets.itemStuff
 		public override void ItemActivate(bool used, bool buttonDown = true)
 		{
 			base.ItemActivate(used, buttonDown);
+		}
+
+		[ServerRpc]
+		public void generateTraitServerRpc()
+		{
+			generateTraitClientRpc();
+		}
+		[ClientRpc]
+		public void generateTraitClientRpc()
+		{
+			randomtrait = UnityEngine.Random.Range(1, 7);
+			traitGenerated = true;
+			Plugin.ACALog.LogInfo(randomtrait);
 		}
 	}
 }

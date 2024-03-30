@@ -43,7 +43,9 @@ namespace AbandonedCompanyAssets
 		public static Item industrialflashlightitem = assetCall.bundle.LoadAsset<Item>("Assets/Items/industrialflashlight/industrialFlashlightItem.asset");
 		public static Item proabaondedflashlightitem = assetCall.bundle.LoadAsset<Item>("Assets/Items/proflashlight/ProAbandonedFlashlight.asset");
 		public static Item abandonedWalkieItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/AbandonedWalkie/AbandonedWalkieItem.asset");
+		public static Item abandonedTZPItem = assetCall.bundle.LoadAsset<Item>("Assets/Items/TZP-Abandoned/AbandonedTZPItem.asset");
         public static Plugin instance;
+
 		private static bool EnableFlare = true;
 		private static bool EnableGlowsticks = true;
 		private static bool EnableRandomGlowsticks = true;
@@ -55,6 +57,17 @@ namespace AbandonedCompanyAssets
 		private static bool EnableIndustrialFlashlight = true;
 		private static bool EnableProAbandonedFlashlight = true;
 		private static bool EnableAbandonedWalkie = true;
+		private static bool EnableAbandonedTZP = true;
+		private static int CandleSpawnWeight = 10;
+		private static int LighterSpawnWeight = 20;
+		private static int BulletLighterSpawnWeight = 2;
+		private static int AbandonedBBFlashSpawnWeight = 30;
+		private static int AbandonedProFlashSpawnWeight = 20;
+		private static int IndustrialFlashlightSpawnWeight = 5;
+		private static int AbandonedWalkieSpawnWeight = 20;
+		private static int AbandonedTZPSpawnWeight = 60;
+		private static int DroppedGlowstickSpawnWeight = 10;
+
 
 
 
@@ -109,8 +122,7 @@ namespace AbandonedCompanyAssets
 			NetworkPrefabs.RegisterNetworkPrefab(industrialflashlightitem.spawnPrefab);
 			NetworkPrefabs.RegisterNetworkPrefab(proabaondedflashlightitem.spawnPrefab);
 			NetworkPrefabs.RegisterNetworkPrefab(abandonedWalkieItem.spawnPrefab);
-
-
+			NetworkPrefabs.RegisterNetworkPrefab(abandonedTZPItem.spawnPrefab);
 
 			Utilities.FixMixerGroups(candle.spawnPrefab);
             Utilities.FixMixerGroups(GlowstickDroppedItem.spawnPrefab);
@@ -125,18 +137,20 @@ namespace AbandonedCompanyAssets
 			Utilities.FixMixerGroups(industrialflashlightitem.spawnPrefab);
 			Utilities.FixMixerGroups(proabaondedflashlightitem.spawnPrefab);
 			Utilities.FixMixerGroups(abandonedWalkieItem.spawnPrefab);
+			Utilities.FixMixerGroups(abandonedTZPItem.spawnPrefab);
 
-			if (EnableGlowsticks) { Items.RegisterScrap(GlowstickDroppedItem, (int)spawnRate.Legendary, (LevelTypes)(-1)); }
-            if (EnableDungeonCandle) { Items.RegisterScrap(candle, (int)spawnRate.Epic, (LevelTypes)(-1)); }
+			if (EnableGlowsticks) { Items.RegisterScrap(GlowstickDroppedItem, DroppedGlowstickSpawnWeight, (LevelTypes)(-1)); }
+            if (EnableDungeonCandle) { Items.RegisterScrap(candle, CandleSpawnWeight, (LevelTypes)(-1)); }
             if (EnableLighter) 
 			{ 
-				Items.RegisterScrap(lighter, (int)spawnRate.Rare, (LevelTypes)(-1));
-				Items.RegisterScrap(bulletLighter, 2, (LevelTypes)(-1));
+				Items.RegisterScrap(lighter, LighterSpawnWeight, (LevelTypes)(-1));
+				Items.RegisterScrap(bulletLighter, BulletLighterSpawnWeight, (LevelTypes)(-1));
 			}
-            if (EnableAbandonedFlashlight) { Items.RegisterScrap(abandonedflashlightitem, (int)spawnRate.Uncommon, (LevelTypes)(-1)); }
-			if (EnableIndustrialFlashlight) { Items.RegisterScrap(industrialflashlightitem, (int)spawnRate.Legendary, (LevelTypes)(-1)); }
-			if (EnableProAbandonedFlashlight) { Items.RegisterScrap(proabaondedflashlightitem, (int)spawnRate.Rare, (LevelTypes)(-1)); }
-			if (EnableAbandonedWalkie) { Items.RegisterScrap(abandonedWalkieItem, (int)spawnRate.Legendary, (LevelTypes)(-1));  }
+            if (EnableAbandonedFlashlight) { Items.RegisterScrap(abandonedflashlightitem, AbandonedBBFlashSpawnWeight, (LevelTypes)(-1)); }
+			if (EnableIndustrialFlashlight) { Items.RegisterScrap(industrialflashlightitem, IndustrialFlashlightSpawnWeight, (LevelTypes)(-1)); }
+			if (EnableProAbandonedFlashlight) { Items.RegisterScrap(proabaondedflashlightitem, AbandonedProFlashSpawnWeight, (LevelTypes)(-1)); }
+			if (EnableAbandonedWalkie) { Items.RegisterScrap(abandonedWalkieItem, AbandonedWalkieSpawnWeight, (LevelTypes)(-1));  }
+			if (EnableAbandonedTZP) { Items.RegisterScrap(abandonedTZPItem, AbandonedTZPSpawnWeight, (LevelTypes)(-1)); }
 			
 
 
@@ -171,6 +185,8 @@ namespace AbandonedCompanyAssets
         }
 		private void loadConfig()
 		{
+			FlareCompatName = Config.Bind<bool>("Extra", "EnableFlareCompatibilityName", false, "Should the Emergency Flare's name be changed to improve compatibility? [Default: false]").Value;
+
 			EnableFlare = Config.Bind<bool>("General", "EnableFlare", true, "Should the Emergency Flare be available in the shop?").Value;
 			EnableGlowsticks = Config.Bind<bool>("General", "EnableGlowsticks", true, "Should the Glowsticks be available in the shop?").Value;
 			EnableLighter = Config.Bind<bool>("General", "EnableLighter", true, "Should the Lighters spawn in the dungeon?").Value;
@@ -178,10 +194,20 @@ namespace AbandonedCompanyAssets
 			EnableDungeonCandle = Config.Bind<bool>("General", "EnableDungeonCandle", true, "Should the Antique Candles spawn in the dungeon?").Value;
 			EnableAbandonedFlashlight = Config.Bind<bool>("General", "EnableBBFlashlight", true, "Should the Abandoned Flashlights spawn in the dungeon?").Value;
 			EnableRandomGlowsticks = Config.Bind<bool>("General", "EnableRandomGlowsticks", true, "Should the random glowsticks spawn in the dungeon?").Value;
-			FlareCompatName = Config.Bind<bool>("Extra", "EnableFlareCompatibilityName", false, "Should the Emergency Flare's name be changed to improve compatibility?").Value;
 			EnableIndustrialFlashlight = Config.Bind<bool>("General", "EnableIndustrialFlashlight", true, "Should the Industrial Flashlight spawn in the dungeon?").Value;
 			EnableProAbandonedFlashlight = Config.Bind<bool>("General", "EnableProAbandonedFlashlight", true, "Should the Abandoned Pro-Flashlight spawn in the dungeon?").Value;
 			EnableAbandonedWalkie = Config.Bind<bool>("General", "EnableAbandonedWalkieTalkie", true, "Should the Abandoned Walkie-Talkie spawn in the dungeon?").Value;
+			EnableAbandonedTZP = Config.Bind<bool>("General", "EnableAbandonedTZP", true, "Should the Abandoned TZP-Inhaler spawn in the dungeon?").Value;
+
+			CandleSpawnWeight = Config.Bind<int>("Spawn Weights", "CandleSpawnWeight", 10, "What should the spawn weight of the Antique Candle be? [Default: 10]").Value;
+			LighterSpawnWeight = Config.Bind<int>("Spawn Weights", "LighterSpawnWeight", 20, "What should the spawn weight of the Lighter be? [Default: 20]").Value;
+			BulletLighterSpawnWeight = Config.Bind<int>("Spawn Weights", "BulletLighterSpawnWeight", 2, "What should the spawn weight of the Bullet Lighter be? [Default: 2]").Value;
+			AbandonedBBFlashSpawnWeight = Config.Bind<int>("Spawn Weights", "AbandonedBBFlashSpawnWeight", 30, "What should the spawn weight of the Abandoned Flashlight be? [Default: 30]").Value;
+			AbandonedProFlashSpawnWeight = Config.Bind<int>("Spawn Weights", "AbandonedProFlashSpawnWeight", 20, "What should the spawn weight of the Abandoned Pro-Flashlight be? [Default: 20]").Value;
+			IndustrialFlashlightSpawnWeight = Config.Bind<int>("Spawn Weights", "IndustrialFlashlightSpawnWeight", 5, "What should the spawn weight of the Industrial Flashlight be? [Default: 5]").Value;
+			AbandonedWalkieSpawnWeight = Config.Bind<int>("Spawn Weights", "AbandonedWalkieSpawnWeight", 20, "What should the spawn weight of the Abandoned Walkie-Talkie be? [Default: 20]").Value;
+			AbandonedTZPSpawnWeight = Config.Bind<int>("Spawn Weights", "AbandonedTZPSpawnWeight", 60, "What should the spawn weight of the Abandoned TZP-Inhaler be? [Default: 60]").Value;
+			DroppedGlowstickSpawnWeight = Config.Bind<int>("Spawn Weights", "DropedGlowstickSpawnWeight", 10, "What should the spawn weight of the Dropped Glowstick be? [Default: 10]").Value;
 
 		}
     }

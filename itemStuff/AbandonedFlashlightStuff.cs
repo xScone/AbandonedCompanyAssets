@@ -40,28 +40,18 @@ namespace AbandonedCompanyAssets.itemStuff
 		public static AudioClip bulbflicker = assetCall.bundle.LoadAsset<AudioClip>("Assets/Items/bbflashlight/flashlight flicker.wav");
 		public static AudioClip bulbexplosion = assetCall.bundle.LoadAsset<AudioClip>("Assets/Items/bbflashlight/flashlight bulb explode.wav");
 
-		 
+
 		public override void LoadItemSaveData(int saveData)
 		{
 			base.LoadItemSaveData(saveData);
-			short val1 = (short)(saveData >> 16);
-			short val2 = (short)(saveData & 0xFFFF);
-			//Plugin.ACALog.LogInfo("loaded battery: " + val2);
-			this.randomtrait = (int)val1;
-			this.maxbulbfailures = val2;
-			saveData = 0;
-
+			Plugin.ACALog.LogInfo("Load Data:" + (saveData));
+			this.randomtrait = (int)saveData;
 		}
 		public override int GetItemDataToSave()
 		{
 			base.GetItemDataToSave();
-			Plugin.ACALog.LogInfo(this.gameObject.GetComponent<FlashlightItem>().insertedBattery.charge);
-			short int1 = (short)randomtrait;
-			short int2 = (short)maxbulbfailures;
-
-			int combined = (int1 << 16) | (int2 & 0XFFFF);
-			return combined;
-
+			Plugin.ACALog.LogInfo("Save Data:" + randomtrait);
+			return randomtrait;
 		}
 
 		public override void Start()
@@ -87,7 +77,7 @@ namespace AbandonedCompanyAssets.itemStuff
 				this.GetComponent<FlashlightItem>().insertedBattery.charge = 1f;
 			}
 			
-			revealtime = UnityEngine.Random.Range(60, 90);
+			revealtime = UnityEngine.Random.Range(10, 30);
 			//make sure to save trait and then load trait here so that this will know it has a trait.
 			if (randomtrait != 0)
 			{
@@ -106,7 +96,7 @@ namespace AbandonedCompanyAssets.itemStuff
 			base.Update();
 			if (chargeonship)
 			{
-				if (GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom && this.gameObject.GetComponent<FlashlightItem>().insertedBattery.charge < 100 && !isBeingUsed)
+				if (GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom && this.gameObject.GetComponent<FlashlightItem>().insertedBattery.charge < 1 && !isBeingUsed)
 				{
 					this.gameObject.GetComponent<FlashlightItem>().insertedBattery.charge += Time.deltaTime / 750;
 				}
@@ -128,7 +118,7 @@ namespace AbandonedCompanyAssets.itemStuff
 					//faulty battery
 					if (randomtrait == 2)
 					{
-						if (!isBeingUsed)
+						if (!isBeingUsed && this.gameObject.GetComponent<FlashlightItem>().insertedBattery.charge > 0)
 						{
 							this.gameObject.GetComponent<FlashlightItem>().insertedBattery.charge -= Time.deltaTime / 350;
 						}
@@ -136,7 +126,7 @@ namespace AbandonedCompanyAssets.itemStuff
 					//faulty fast drain battery
 					if (randomtrait == 3)
 					{
-						if (isBeingUsed)
+						if (isBeingUsed && this.gameObject.GetComponent<FlashlightItem>().insertedBattery.charge > 0)
 						{
 							this.gameObject.GetComponent<FlashlightItem>().insertedBattery.charge -= Time.deltaTime / 200;
 						}
@@ -208,9 +198,10 @@ namespace AbandonedCompanyAssets.itemStuff
 			addScriptServerRpc();
 			if (!traitGenerated || randomtrait == 0)
 			{
-				randomtrait = UnityEngine.Random.Range(1, 7);
-				traitGenerated = true;
-				Plugin.ACALog.LogInfo(randomtrait);
+				if (IsOwner)
+				{
+					generateTraitServerRpc();
+				}
 			}
 			if (randomtrait == 4)
 			{
@@ -231,6 +222,18 @@ namespace AbandonedCompanyAssets.itemStuff
 		}
 
 		// flickering stuff
+		[ServerRpc]
+		public void generateTraitServerRpc()
+		{
+			generateTraitClientRpc();
+		}
+		[ClientRpc]
+		public void generateTraitClientRpc()
+		{
+			randomtrait = UnityEngine.Random.Range(1, 7);
+			traitGenerated = true;
+			Plugin.ACALog.LogInfo(randomtrait);
+		}
 		[ServerRpc]
 		public void dropFlashlightServerRpc()
 		{
